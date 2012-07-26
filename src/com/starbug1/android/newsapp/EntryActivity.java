@@ -4,20 +4,14 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import me.parappa.sdk.PaRappa;
-
-import com.starbug1.android.newsapp.data.DatabaseHelper;
-import com.starbug1.android.newsapp.data.NewsListItem;
-import com.starbug1.android.newsapp.utils.AppUtils;
-import com.starbug1.android.newsapp.utils.UrlUtils;
-
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -32,9 +26,15 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.starbug1.android.newsapp.data.DatabaseHelper;
+import com.starbug1.android.newsapp.data.NewsListItem;
+import com.starbug1.android.newsapp.utils.AppUtils;
+import com.starbug1.android.newsapp.utils.GIFView;
+import com.starbug1.android.newsapp.utils.UrlUtils;
+
 public class EntryActivity extends Activity {
 	private static final String TAG = "EntryActivity";
-	private ProgressDialog progressDialog_;
+	private GIFView loading_;
 	final Handler handler_ = new Handler();
 	private NewsListItem currentItem_ = null;
 	private DatabaseHelper dbHelper_ = null;
@@ -44,10 +44,22 @@ public class EntryActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (AppUtils.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectDiskReads().detectDiskWrites().detectAll()
+					.penaltyLog().build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectLeakedSqlLiteObjects()
+					.penaltyLog().penaltyDeath().build());
+		}
 		setContentView(R.layout.entry);
 
 		dbHelper_ = new DatabaseHelper(this);
 
+		loading_ = (GIFView)findViewById(R.id.loading);
+		loading_.setResouceId(R.drawable.loading);
+		loading_.setVisibility(GIFView.INVISIBLE);
+		
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
@@ -74,9 +86,7 @@ public class EntryActivity extends Activity {
 						if (v.getContentHeight() > 0) {
 							handler_.post(new Runnable() {
 								public void run() {
-									if (progressDialog_ != null) {
-										progressDialog_.dismiss();
-									}
+									loading_.setVisibility(GIFView.INVISIBLE);
 								}
 							});
 							timer.cancel();
@@ -123,9 +133,7 @@ public class EntryActivity extends Activity {
 						currentItem_.getLink(), 
 						this.getResources().getStringArray(R.array.arrays_mobile_url_orgin), 
 						this.getResources().getStringArray(R.array.arrays_mobile_url_repleace)));
-		progressDialog_ = new ProgressDialog(this);
-		progressDialog_.setMessage("読み込み中...");
-		progressDialog_.show();
+		loading_.setVisibility(GIFView.VISIBLE);
 
 		parappa_ = new PaRappa(this);
 
@@ -151,6 +159,7 @@ public class EntryActivity extends Activity {
 		if (item.getItemId() == R.id.menu_reload) {
 			WebView entryView = (WebView) this
 			.findViewById(R.id.entryView);
+			loading_.setVisibility(GIFView.VISIBLE);
 			entryView.reload();
 		} else if (item.getItemId() == R.id.menu_share) {
 			share();

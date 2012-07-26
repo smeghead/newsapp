@@ -16,6 +16,7 @@ import com.starbug1.android.newsapp.AppException;
 
 public class AppUtils {
 	private static final String TAG = "AppUtils";
+	public static final boolean DEBUG = false;
 	
 	public static String getVersionName(Context context) {
 		PackageInfo packageInfo = null;

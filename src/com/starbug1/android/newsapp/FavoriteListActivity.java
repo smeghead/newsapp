@@ -4,6 +4,7 @@ import me.parappa.sdk.PaRappa;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.StrictMode;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -13,25 +14,39 @@ import android.widget.TextView;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.utils.AppUtils;
+import com.starbug1.android.newsapp.utils.GIFView;
 
 public class FavoriteListActivity extends AbstractActivity {
 	final Handler handler_ = new Handler();
+	private GIFView loading_;
 	private DatabaseHelper dbHelper_ = null;
 	public boolean gridUpdating = false;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		if (AppUtils.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectDiskReads().detectDiskWrites().detectAll()
+					.penaltyLog().build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectLeakedSqlLiteObjects()
+					.penaltyLog().penaltyDeath().build());
+		}
 		setContentView(R.layout.favorite_list);
 		
 		dbHelper_ = new DatabaseHelper(this);
 
+		loading_ = (GIFView)findViewById(R.id.loading);
+		loading_.setResouceId(R.drawable.loading);
+		loading_.setVisibility(GIFView.INVISIBLE);
+		
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
 		
 		setupGridColumns();
-		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this, R.class);
+		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this, loading_);
 		task.execute();
 
 		parappa_ = new PaRappa(this);

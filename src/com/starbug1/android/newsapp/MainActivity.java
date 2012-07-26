@@ -5,7 +5,6 @@ import java.util.List;
 
 import me.parappa.sdk.PaRappa;
 import android.app.NotificationManager;
-import android.app.ProgressDialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +13,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.StrictMode;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -30,13 +30,14 @@ import android.widget.Toast;
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
 import com.starbug1.android.newsapp.utils.AppUtils;
+import com.starbug1.android.newsapp.utils.GIFView;
 
 public class MainActivity extends AbstractActivity {
 	private static final String TAG = "MudanewsActivity";
-	
+
 	private List<NewsListItem> items_;
 	private int page_ = 0;
-	private ProgressDialog progressDialog_;
+	private GIFView loading_;
 	private DatabaseHelper dbHelper_ = null;
 	private NewsListAdapter adapter_;
 	public boolean hasNextPage = true;
@@ -75,6 +76,14 @@ public class MainActivity extends AbstractActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
+		if (AppUtils.DEBUG) {
+			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
+					.detectDiskReads().detectDiskWrites().detectAll()
+					.penaltyLog().build());
+			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
+					.detectLeakedSqlLiteObjects()
+					.penaltyLog().penaltyDeath().build());
+		}
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.main);
 		Log.d(TAG, "setContentView");
@@ -88,6 +97,10 @@ public class MainActivity extends AbstractActivity {
 		items_ = new ArrayList<NewsListItem>();
 		adapter_ = new NewsListAdapter(this, R.class);
 
+		loading_ = (GIFView)findViewById(R.id.loading);
+		loading_.setResouceId(R.drawable.loading);
+		loading_.setVisibility(GIFView.INVISIBLE);
+		
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
@@ -159,7 +172,7 @@ public class MainActivity extends AbstractActivity {
 		manager.cancelAll();
 		
 		parappa_ = new PaRappa(this);
-		
+				
 		AppUtils.onCreateAditional(this);
 	}
 
@@ -187,7 +200,7 @@ public class MainActivity extends AbstractActivity {
 			adapter_.clear();
 		}
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		task_ = new NewsCollectTask(this, grid, adapter_);
+		task_ = new NewsCollectTask(this, dbHelper_, grid, adapter_, loading_);
 		task_.execute(String.valueOf(page));
 	}
 
@@ -236,9 +249,8 @@ public class MainActivity extends AbstractActivity {
 	private void fetchFeeds(boolean isFirst) {
 		final boolean first = isFirst;
 		items_.clear();
-		progressDialog_ = new ProgressDialog(this);
-		progressDialog_.setMessage("読み込み中...");
-		progressDialog_.show();
+		loading_.setVisibility(GIFView.VISIBLE);
+
 		new Thread() {
 			@Override
 			public void run() {
@@ -248,7 +260,7 @@ public class MainActivity extends AbstractActivity {
 						final TextView initialMessage = (TextView) findViewById(R.id.initialMessage);
 						initialMessage.setVisibility(TextView.GONE);
 
-						progressDialog_.dismiss();
+						loading_.setVisibility(GIFView.INVISIBLE);
 						page_ = 0; hasNextPage = true;
 						items_.clear();
 						updateList(page_);

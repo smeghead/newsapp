@@ -252,7 +252,6 @@ public abstract class FetchFeedService extends Service {
 	private List<NewsListItem> parseXml(String source, String urlString) {
 		final XmlPullParser parser = Xml.newPullParser();
 		final List<NewsListItem> list = new ArrayList<NewsListItem>(20);
-		final Feed feed = this.getFeed(source);
 		
 		InputStream is = null;
 		try {

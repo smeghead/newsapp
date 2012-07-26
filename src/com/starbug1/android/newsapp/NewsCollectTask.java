@@ -14,6 +14,7 @@ import android.widget.GridView;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
+import com.starbug1.android.newsapp.utils.GIFView;
 
 /**
  * @author smeghead
@@ -22,19 +23,24 @@ import com.starbug1.android.newsapp.data.NewsListItem;
 public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListItem>> {
 	private final int MAX_ENTRIES_PER_PAGE = 30;
 	private final MainActivity activity_;
+	private final DatabaseHelper helper_;
 	private final NewsListAdapter adapter_;
 	private final GridView grid_;
 	private int page_;
+	private GIFView loading_;
 
-	public NewsCollectTask(MainActivity activity, GridView grid, NewsListAdapter adapter) {
+	public NewsCollectTask(MainActivity activity, DatabaseHelper helper, GridView grid, NewsListAdapter adapter, GIFView loading) {
 		activity_ = activity;
+		helper_ = helper;
 		grid_ = grid;
 		adapter_ = adapter;
+		loading_ = loading;
 		activity_.gridUpdating = true;
 	}
 	
 	@Override
 	protected void onPreExecute() {
+		loading_.setVisibility(GIFView.VISIBLE);
 	}
 	
 	/* (non-Javadoc)
@@ -47,8 +53,7 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 		SQLiteDatabase db = null;
 		Cursor c = null;
 		try {
-			final DatabaseHelper helper = new DatabaseHelper(activity_);
-			db = helper.getWritableDatabase();
+			db = helper_.getWritableDatabase();
 
 			c = db.rawQuery(
 					"select f.id, f.title, f.description, f.link, f.source, count(v.id), fav.id " +
@@ -120,6 +125,7 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 		if (page_ == 0) {
 			grid_.setAdapter(adapter_);
 		}
+		loading_.setVisibility(GIFView.INVISIBLE);
 		activity_.gridUpdating = false;
 	}
 	
