@@ -18,11 +18,13 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.View.OnClickListener;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,12 +36,29 @@ import com.starbug1.android.newsapp.utils.UrlUtils;
 
 public class EntryActivity extends Activity {
 	private static final String TAG = "EntryActivity";
-	private GIFView loading_;
 	final Handler handler_ = new Handler();
 	private NewsListItem currentItem_ = null;
 	private DatabaseHelper dbHelper_ = null;
 	private PaRappa parappa_;
 	private WebView webview_;
+	
+	ProgressBar loading_ = null;
+	private void setLoading(boolean start) {
+		if (loading_ == null) {
+			loading_ = (ProgressBar) findViewById(R.id.loading);
+			if (loading_ == null) {
+				Log.e(TAG, "no loading progressbar.");
+				return;
+			}
+		}
+		loading_.setVisibility(start ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+	}
+	public void startLoading() {
+		setLoading(true);
+	}
+	public void stopLoading() {
+		setLoading(false);
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -52,13 +71,14 @@ public class EntryActivity extends Activity {
 					.detectLeakedSqlLiteObjects()
 					.penaltyLog().penaltyDeath().build());
 		}
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		
 		setContentView(R.layout.entry);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
 
 		dbHelper_ = new DatabaseHelper(this);
 
-		loading_ = (GIFView)findViewById(R.id.loading);
-		loading_.setResouceId(R.drawable.loading);
-		loading_.setVisibility(GIFView.INVISIBLE);
+		startLoading();
 		
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
@@ -86,7 +106,7 @@ public class EntryActivity extends Activity {
 						if (v.getContentHeight() > 0) {
 							handler_.post(new Runnable() {
 								public void run() {
-									loading_.setVisibility(GIFView.INVISIBLE);
+									stopLoading();
 								}
 							});
 							timer.cancel();
@@ -133,11 +153,16 @@ public class EntryActivity extends Activity {
 						currentItem_.getLink(), 
 						this.getResources().getStringArray(R.array.arrays_mobile_url_orgin), 
 						this.getResources().getStringArray(R.array.arrays_mobile_url_repleace)));
-		loading_.setVisibility(GIFView.VISIBLE);
+		startLoading();
 
 		parappa_ = new PaRappa(this);
 
+		initAdditional();
 		AppUtils.onCreateAditional(this);
+	}
+
+	protected void initAdditional() {
+		
 	}
 
 	@Override
@@ -159,7 +184,7 @@ public class EntryActivity extends Activity {
 		if (item.getItemId() == R.id.menu_reload) {
 			WebView entryView = (WebView) this
 			.findViewById(R.id.entryView);
-			loading_.setVisibility(GIFView.VISIBLE);
+			startLoading();
 			entryView.reload();
 		} else if (item.getItemId() == R.id.menu_share) {
 			share();
@@ -175,7 +200,7 @@ public class EntryActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	private void favorite() {
+	protected void favorite() {
 		if (currentItem_ == null) return;
 		Log.d(TAG, "favorite id:" + currentItem_.getId());
 		
@@ -195,42 +220,17 @@ public class EntryActivity extends Activity {
 		}
 	}
 	
-	private void share() {
+	protected void share() {
 		if (currentItem_ == null) {
 			return;
 		}
 		parappa_.shareString(currentItem_.getTitle() + " " + currentItem_.getLink() + " #" + getResources().getString(R.string.app_name), "共有");
 	}
 	
-	private void shareAll() {
+	protected void shareAll() {
 		parappa_.shareString(getResources().getString(R.string.shareDescription) + " #" + getResources().getString(R.string.app_name), "紹介");
 	}		
 
-//	@Override
-//	public boolean onKeyDown(int keyCode, KeyEvent event) {
-//		if (keyCode == KeyEvent.KEYCODE_BACK) {
-//
-//			Log.d(TAG, "onKeyDown");
-//			Log.d(TAG, "onKeyDown cGeanGoBack:" + webview_.canGoBack());
-//			if (webview_.canGoBack()) {
-//				webview_.goBack();
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
-
-//	@Override
-//	protected void onDestroy() {
-//		Log.d(TAG, "onDestroy");
-//		Log.d(TAG, "onDestroy cGeanGoBack:" + webview_.canGoBack());
-//		if (webview_.canGoBack()) {
-//			webview_.goBack();
-//		} else {
-//			super.onDestroy();
-//		}
-//	}
-	
 	@Override
 	public boolean dispatchKeyEvent(KeyEvent event) {
 		if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {

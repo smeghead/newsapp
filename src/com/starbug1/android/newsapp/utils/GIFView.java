@@ -57,8 +57,6 @@ public class GIFView extends View {
 
 	@Override
 	protected void onDraw(Canvas canvas) {
-		Log.d(TAG, "onDraw");
-//		canvas.drawColor(Color.WHITE);
 		if (movie == null) {
 			return;
 		}
@@ -67,7 +65,6 @@ public class GIFView extends View {
 			moviestart = now;
 		}
 		int relTime = (int) ((now - moviestart) % movie.duration());
-		Log.d(TAG, "onDraw relTime: " + relTime);
 		movie.setTime(relTime);
 		movie.draw(canvas, 2, 2);
 		this.invalidate();

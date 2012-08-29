@@ -9,7 +9,7 @@ import android.util.Log;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	public DatabaseHelper(Context context) {
-		super(context, "mudanews.db", null, 2);
+		super(context, "mudanews.db", null, 3);
 	}
 
 	@Override
@@ -49,6 +49,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 						+ "  id integer primary key,"
 						+ "  feed_id integer not null,"
 						+ "  created_at datetime not null" + ")");
+			} else if (currentVersion < 3 && newVersion == 3) {
+				db.execSQL("create index feeds_idx on feeds (id, deleted)");
+				db.execSQL("create index favorites_idx on favorites (id, feed_id)");
+				db.execSQL("create index images_idx on images (id, feed_id)");			
 			}
 			db.setTransactionSuccessful();
 		} finally {

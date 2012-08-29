@@ -33,7 +33,7 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 	private TextView title_;
 	private final AbstractActivity context_;
 
-	public NewsListAdapter(Context context, Class<?> resourceClass) {
+	public NewsListAdapter(Context context) {
 		super(context, 0, new ArrayList<NewsListItem>());
 		context_ = (AbstractActivity)context;
 		inflater_ = (LayoutInflater) context

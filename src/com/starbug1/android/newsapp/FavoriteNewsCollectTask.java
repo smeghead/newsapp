@@ -28,17 +28,15 @@ import com.starbug1.android.newsapp.utils.GIFView;
 public class FavoriteNewsCollectTask extends AsyncTask<String, Integer, List<FavoriteMonth>> {
 	private final String TAG = "FavoriteNewsCollectTask";
 	private final FavoriteListActivity activity_;
-	private final GIFView loading_;
 	
-	public FavoriteNewsCollectTask(FavoriteListActivity activity, GIFView loading) {
+	public FavoriteNewsCollectTask(FavoriteListActivity activity) {
 		activity_ = activity;
-		loading_ = loading;
 		activity_.gridUpdating = true;
 	}
 	
 	@Override
 	protected void onPreExecute() {
-		loading_.setVisibility(GIFView.VISIBLE);
+		activity_.startLoading();
 	}
 	
 	/* (non-Javadoc)
@@ -53,7 +51,7 @@ public class FavoriteNewsCollectTask extends AsyncTask<String, Integer, List<Fav
 		Cursor c = null;
 		try {
 			final DatabaseHelper helper = new DatabaseHelper(activity_);
-			db = helper.getWritableDatabase();
+			db = helper.getReadableDatabase();
 
 			try {
 				c = db.rawQuery(
@@ -162,7 +160,7 @@ public class FavoriteNewsCollectTask extends AsyncTask<String, Integer, List<Fav
 			adapter.add(month);
 		}
 		list.setAdapter(adapter);
-		loading_.setVisibility(GIFView.INVISIBLE);
+		activity_.stopLoading();
 		
 		activity_.findViewById(R.id.no_favorites_message).setVisibility(result.size() == 0 ? TextView.VISIBLE : TextView.GONE);
 
@@ -182,5 +180,6 @@ public class FavoriteNewsCollectTask extends AsyncTask<String, Integer, List<Fav
 	}
 	
 	public void progresCancel() {
+		activity_.stopLoading();
 	}
 }

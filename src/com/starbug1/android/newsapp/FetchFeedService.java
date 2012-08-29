@@ -111,6 +111,10 @@ public abstract class FetchFeedService extends Service {
 		super.onStart(intent, startId);
 	}
 
+	protected Class getMainActivity() {
+		return MainActivity.class;
+	}
+	
 	private void fetchFeeds() {
 		if (isRunning) return;
 		
@@ -138,7 +142,7 @@ public abstract class FetchFeedService extends Service {
 					}
 
 					final Intent intent = new Intent(FetchFeedService.this,
-							MainActivity.class);
+							getMainActivity());
 					final PendingIntent contentIntent = PendingIntent.getActivity(
 							FetchFeedService.this, 0, intent, 0);
 					notification.setLatestEventInfo(getApplicationContext(), getResources().getString(R.string.app_name),

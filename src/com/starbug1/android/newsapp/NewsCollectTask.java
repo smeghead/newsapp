@@ -21,26 +21,27 @@ import com.starbug1.android.newsapp.utils.GIFView;
  *
  */
 public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListItem>> {
+	private static final String TAG = "NewsCollectTask";
+	
 	private final int MAX_ENTRIES_PER_PAGE = 30;
 	private final MainActivity activity_;
 	private final DatabaseHelper helper_;
 	private final NewsListAdapter adapter_;
 	private final GridView grid_;
 	private int page_;
-	private GIFView loading_;
 
-	public NewsCollectTask(MainActivity activity, DatabaseHelper helper, GridView grid, NewsListAdapter adapter, GIFView loading) {
+	public NewsCollectTask(MainActivity activity, DatabaseHelper helper, GridView grid, NewsListAdapter adapter) {
 		activity_ = activity;
 		helper_ = helper;
 		grid_ = grid;
 		adapter_ = adapter;
-		loading_ = loading;
 		activity_.gridUpdating = true;
 	}
 	
 	@Override
 	protected void onPreExecute() {
-		loading_.setVisibility(GIFView.VISIBLE);
+		Log.d(TAG, "onPreExecute");
+		activity_.startLoading();
 	}
 	
 	/* (non-Javadoc)
@@ -48,13 +49,15 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 	 */
 	@Override
 	protected List<NewsListItem> doInBackground(String... params) {
+		Log.d(TAG, "doInBackground");
 		final List<NewsListItem> result = new ArrayList<NewsListItem>(30);
 		page_ = Integer.parseInt(params[0]);
 		SQLiteDatabase db = null;
 		Cursor c = null;
 		try {
-			db = helper_.getWritableDatabase();
+			db = helper_.getReadableDatabase();
 
+			Log.d(TAG, "doInBackground getWritableDatabase");
 			c = db.rawQuery(
 					"select f.id, f.title, f.description, f.link, f.source, count(v.id), fav.id " +
 					"from feeds as f " +
@@ -99,9 +102,10 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 					if (cu != null) cu.close();
 				}
 			}
+			Log.d(TAG, "doInBackground got records");
 			return result;
 		} catch(Exception e) {
-			Log.e("NewsParserTask", e.getMessage());
+			Log.e(TAG, e.getMessage());
 			throw new AppException("failed to background task.", e);
 		} finally {
 			if (c != null) c.close();
@@ -111,6 +115,7 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 
 	@Override
 	protected void onPostExecute(List<NewsListItem> result) {
+		Log.d(TAG, "onPostExecute ");
 		progresCancel();
 		
 		activity_.hasNextPage = result.size() > MAX_ENTRIES_PER_PAGE;
@@ -125,10 +130,11 @@ public class NewsCollectTask extends AsyncTask<String, Integer, List<NewsListIte
 		if (page_ == 0) {
 			grid_.setAdapter(adapter_);
 		}
-		loading_.setVisibility(GIFView.INVISIBLE);
+		activity_.stopLoading();
 		activity_.gridUpdating = false;
 	}
 	
 	public void progresCancel() {
+		activity_.stopLoading();
 	}
 }

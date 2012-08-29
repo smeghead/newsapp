@@ -57,7 +57,7 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 			final TextView monthLabel = (TextView)view.findViewById(R.id.month);
 			monthLabel.setText(monthDateFormat.format(month.getMonth()));
 			
-			final NewsListAdapter adapter = new NewsListAdapter(context_, R.class);
+			final NewsListAdapter adapter = new NewsListAdapter(context_);
 			for (NewsListItem item : items) {
 				adapter.add(item);
 			}

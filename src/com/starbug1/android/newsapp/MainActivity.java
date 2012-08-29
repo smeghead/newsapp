@@ -19,11 +19,13 @@ import android.view.Display;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,7 +39,6 @@ public class MainActivity extends AbstractActivity {
 
 	private List<NewsListItem> items_;
 	private int page_ = 0;
-	private GIFView loading_;
 	private DatabaseHelper dbHelper_ = null;
 	private NewsListAdapter adapter_;
 	public boolean hasNextPage = true;
@@ -71,7 +72,29 @@ public class MainActivity extends AbstractActivity {
 			isBound_ = false;
 		}
 	}
+	
+	ProgressBar loading_ = null;
+	private void setLoading(boolean start) {
+		if (loading_ == null) {
+			loading_ = (ProgressBar) findViewById(R.id.loading);
+			if (loading_ == null) {
+				Log.e(TAG, "no loading progressbar.");
+				return;
+			}
+		}
+		loading_.setVisibility(start ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+	}
+	public void startLoading() {
+		setLoading(true);
+	}
+	public void stopLoading() {
+		setLoading(false);
+	}
 
+	protected Class getEntryActivityClass() {
+		return EntryActivity.class;
+	}
+	
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -85,8 +108,11 @@ public class MainActivity extends AbstractActivity {
 					.penaltyLog().penaltyDeath().build());
 		}
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		
 		setContentView(R.layout.main);
 		Log.d(TAG, "setContentView");
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
 		
 		dbHelper_ = new DatabaseHelper(this);
 
@@ -95,18 +121,14 @@ public class MainActivity extends AbstractActivity {
 
 		page_ = 0; hasNextPage = true;
 		items_ = new ArrayList<NewsListItem>();
-		adapter_ = new NewsListAdapter(this, R.class);
+		adapter_ = new NewsListAdapter(this);
 
-		loading_ = (GIFView)findViewById(R.id.loading);
-		loading_.setResouceId(R.drawable.loading);
-		loading_.setVisibility(GIFView.INVISIBLE);
-		
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this, EntryActivity.class));
+		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this, getEntryActivityClass()));
 
 		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(this, R.class));
 		Log.d(TAG, "grid setup");
@@ -140,7 +162,7 @@ public class MainActivity extends AbstractActivity {
 		});
 		Log.d(TAG, "scroll");
 
-		// 初回起動なら、feed取得 ボタンを表示する
+		// 初回起動
 		if (dbHelper_.entryIsEmpty()) {
 			final TextView initialMessage = (TextView) this.findViewById(R.id.initialMessage);
 			initialMessage.setVisibility(Button.VISIBLE);
@@ -162,18 +184,26 @@ public class MainActivity extends AbstractActivity {
 					});
 				}
 			}).start();
+		} else {
+			Log.d(TAG, "updateList start.");
+			updateList(page_);
+			Log.d(TAG, "updateList end.");
 		}
-
-		Log.d(TAG, "updateList start.");
-		updateList(page_);
-		Log.d(TAG, "updateList end.");
 
 		final NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.cancelAll();
+		Log.d(TAG, "notify cancel");
 		
 		parappa_ = new PaRappa(this);
-				
+		Log.d(TAG, "parappa");
+		
+		initAdditional();
 		AppUtils.onCreateAditional(this);
+		Log.d(TAG, "aditional");
+	}
+	
+	protected void initAdditional() {
+		
 	}
 
 	private NewsCollectTask task_ = null;
@@ -194,13 +224,14 @@ public class MainActivity extends AbstractActivity {
 	}
 
 	private void updateList(int page) {
+
 		setupGridColumns();
 
 		if (page_ == 0) {
 			adapter_.clear();
 		}
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		task_ = new NewsCollectTask(this, dbHelper_, grid, adapter_, loading_);
+		task_ = new NewsCollectTask(this, dbHelper_, grid, adapter_);
 		task_.execute(String.valueOf(page));
 	}
 
@@ -237,19 +268,19 @@ public class MainActivity extends AbstractActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	private void shareAll() {
+	protected void shareAll() {
 		parappa_.shareString(getResources().getString(R.string.shareDescription) + " #" + getResources().getString(R.string.app_name), "紹介");
 	}
-		
-	private void settings() {
+
+	protected void settings() {
 		final Intent intent = new Intent(this, AppPrefActivity.class);
 		startActivity(intent);
 	}
 
-	private void fetchFeeds(boolean isFirst) {
+	protected void fetchFeeds(boolean isFirst) {
 		final boolean first = isFirst;
 		items_.clear();
-		loading_.setVisibility(GIFView.VISIBLE);
+		startLoading();
 
 		new Thread() {
 			@Override
@@ -260,7 +291,7 @@ public class MainActivity extends AbstractActivity {
 						final TextView initialMessage = (TextView) findViewById(R.id.initialMessage);
 						initialMessage.setVisibility(TextView.GONE);
 
-						loading_.setVisibility(GIFView.INVISIBLE);
+						startLoading();
 						page_ = 0; hasNextPage = true;
 						items_.clear();
 						updateList(page_);

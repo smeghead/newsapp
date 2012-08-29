@@ -10,6 +10,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
+import android.view.MenuItem;
 
 import com.starbug1.android.newsapp.ActivityProcessAditional;
 import com.starbug1.android.newsapp.AppException;

@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="CustomTheme">        
-	    <item name="android:windowNoTitle">true</item>
+    <style name="CustomTheme" parent="android:Theme">
+<!--         <item name="android:windowTitleSize">35dip</item> -->
+        <item name="android:windowTitleBackgroundStyle">@style/header_background_color</item>
+    </style>
+    <style name="CustomTheme">
+<!-- 	    <item name="android:windowNoTitle">true</item> -->
   	</style>
   	<style name="appLayout">
   	 <item name="android:background">#ffffff</item>
