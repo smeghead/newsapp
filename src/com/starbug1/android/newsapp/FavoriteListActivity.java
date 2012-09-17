@@ -5,6 +5,7 @@ import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -17,7 +18,6 @@ import android.widget.TextView;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.utils.AppUtils;
-import com.starbug1.android.newsapp.utils.GIFView;
 
 public class FavoriteListActivity extends AbstractActivity {
 	private static final String TAG = "FavoriteListActivity";
@@ -68,7 +68,7 @@ public class FavoriteListActivity extends AbstractActivity {
 		version.setText(versionName);
 		
 		setupGridColumns();
-		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this);
+		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this, dbHelper_);
 		task.execute();
 
 		parappa_ = new PaRappa(this);
@@ -99,10 +99,12 @@ public class FavoriteListActivity extends AbstractActivity {
 
 	private int column_count_ = 1;
 	private void setupGridColumns() {
+		final DisplayMetrics metrics = new DisplayMetrics();
+		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);  
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
-		final int width = d.getWidth();
-		column_count_ = width / 160;
+		int width = (int) (d.getWidth() / metrics.scaledDensity);
+		column_count_ = (int) (width / (160 / 1.5));
 		final ListView list = (ListView) this.findViewById(R.id.favorite_blocks);
 		for (int i = 0, len = list.getChildCount(); i < len; i++) {
 			final View child = list.getChildAt(i);

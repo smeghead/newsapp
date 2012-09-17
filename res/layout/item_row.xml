@@ -3,16 +3,16 @@
 		android:layout_height="wrap_content" 
 		android:layout_width="match_parent" 
 		android:id="@+id/item_container"
-		xmlns:android="http://schemas.android.com/apk/res/android" android:minHeight="160px">
+		xmlns:android="http://schemas.android.com/apk/res/android" android:minHeight="106dp">
 	<ImageView
 		android:src="@android:drawable/ic_menu_gallery"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
 		android:id="@+id/item_image"
-		android:maxHeight="160px"
-		android:minHeight="160px"
-		android:maxWidth="160px"
-		android:minWidth="160px">
+		android:maxHeight="106dp"
+		android:minHeight="106dp"
+		android:maxWidth="106dp"
+		android:minWidth="106dp">
 	</ImageView>
 	<TextView
 		android:id="@+id/item_title"
@@ -21,11 +21,11 @@
 		android:layout_gravity="bottom"
 		android:textColor="#eeffffff"
 		android:textSize="10sp"
-		android:maxHeight="58px"
-		android:layout_marginBottom="2px"
+		android:maxHeight="37dp"
+		android:layout_marginBottom="0dp"
 		android:background="#99000000"/>
-	<LinearLayout android:id="@+id/linearLayout1" android:layout_height="match_parent" android:layout_gravity="right|top" android:layout_width="wrap_content" android:layout_margin="5px" android:weightSum="1">
-		<ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/newentry" android:layout_gravity="right|center_vertical" android:id="@+id/newEntry"></ImageView>
-		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/btn_star_big_off" android:id="@+id/favorite"></ImageView>
+	<LinearLayout android:id="@+id/linearLayout1" android:layout_height="match_parent" android:layout_gravity="right|top" android:layout_width="wrap_content" android:layout_margin="3dp" android:weightSum="1">
+		<ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/newentry" android:layout_gravity="right|center_vertical" android:id="@+id/newEntry" android:contentDescription="newentry"></ImageView>
+		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/btn_star_big_off" android:id="@+id/favorite" android:contentDescription="favorite"></ImageView>
 	</LinearLayout>
 </FrameLayout>

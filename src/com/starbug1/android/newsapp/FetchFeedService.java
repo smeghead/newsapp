@@ -30,17 +30,15 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.ListPreference;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
 import android.util.Log;
@@ -48,6 +46,7 @@ import android.util.Xml;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
+import com.starbug1.android.newsapp.utils.AppUtils;
 import com.starbug1.android.newsapp.utils.FileDownloader;
 import com.starbug1.android.newsapp.utils.FlushedInputStream;
 import com.starbug1.android.newsapp.utils.InternetStatus;
@@ -82,19 +81,7 @@ public abstract class FetchFeedService extends Service {
 		
 		sharedPreferences_ = PreferenceManager.getDefaultSharedPreferences(this);
 		final int clowlIntervals = Integer.parseInt(sharedPreferences_.getString("clowl_intervals", "60"));
-		final AlarmManager alarmManager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-		final Intent alarmIntent = new Intent(this, AlarmReceiver.class);
-		final PendingIntent sender = PendingIntent.getBroadcast(this, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-		if (clowlIntervals != 0) {
-			final GregorianCalendar calendar = new GregorianCalendar();
-			alarmManager.setInexactRepeating(
-					AlarmManager.RTC_WAKEUP,
-					calendar.getTimeInMillis() + 1000 * 60 * 1,
-					1000 * 60 * clowlIntervals,
-					sender); 
-		} else {
-			alarmManager.cancel(sender);
-		}
+		AppUtils.updateClowlIntervals(this, clowlIntervals);
 		super.onCreate();
 	}
 
@@ -118,6 +105,11 @@ public abstract class FetchFeedService extends Service {
 	private void fetchFeeds() {
 		if (isRunning) return;
 		
+		final int interval = Integer.parseInt(sharedPreferences_.getString("clowl_intervals", "60"));
+		if (interval == 0) {
+			Log.d(TAG, "not need to clowl.");
+			return;
+		}
 		final boolean nightClowl = sharedPreferences_.getBoolean("pref_night_clowl", false);
 		final int hour = new Date().getHours();
 		if (!nightClowl && hour < 7) {
@@ -359,7 +351,7 @@ public abstract class FetchFeedService extends Service {
 		return new Date().getTime();
 	}
 	
-	private NewsListItem fetchImage(NewsListItem item) { // //OutOfMemory 対策として同期化した。
+	public NewsListItem fetchImage(NewsListItem item) { // //OutOfMemory 対策として同期化した。
 			String imageUrl = item.getImageUrl();
 			if (imageUrl == null || imageUrl.length() == 0) {
 				try {
@@ -433,53 +425,7 @@ public abstract class FetchFeedService extends Service {
 	private int registerNews(List<NewsListItem> list) {
 		int registerCount = 0;
 		final DatabaseHelper helper = new DatabaseHelper(this);
-		SQLiteDatabase db = null;
-		synchronized (Lock.obj) {
-			db = helper.getWritableDatabase();
-		}
-		Date now = new Date();
-//		db.execSQL("delete from feeds");
-//		db.execSQL("delete from images");
-		
-		Cursor c = null;
-		try {
-			for (NewsListItem item : list) {
-				c = db.rawQuery("select id from feeds where link = ?", new String[]{item.getLink()});
-				int count = c.getCount();
-				c.close(); c = null;
-				if (count > 0) continue; //同じ リンクURLのエントリがあったら、取り込まない。
-				
-				item = fetchImage(item);
-
-				synchronized (Lock.obj) {
-					ContentValues values = new ContentValues();
-			        values.put("source", item.getSource());
-			        values.put("title", item.getTitle());
-			        values.put("link", item.getLink());
-			        values.put("description", item.getDescription());
-			        values.put("category", item.getCategory());
-			        values.put("published_at", item.getPublishedAt());
-			        values.put("created_at", now.getTime());
-			        long id = db.insert("feeds", null, values);
-
-			        registerCount++;
-
-			        if (item.getImage() == null) {
-			        	continue;
-			        }
-			        values = new ContentValues();
-			        values.put("feed_id", id);
-			        values.put("image", item.getImage());
-			        values.put("created_at", now.getTime());
-			        db.insert("images", null, values);
-				}
-			}
-			db.close();
-			return registerCount;
-		} finally {
-			if (c != null) c.close();
-			if (db != null && db.isOpen()) db.close();
-		}
+		return helper.registerItems(list, registerCount, helper, this);
 	}
 
     public class FetchFeedServiceLocalBinder extends Binder {
@@ -509,8 +455,4 @@ public abstract class FetchFeedService extends Service {
         //onUnbindをreturn trueでoverrideすると次回バインド時にonRebildが呼ばれる
         return true;
     }
-}
-
-class Lock {
-	static Object obj = new Object();
 }

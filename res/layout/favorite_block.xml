@@ -20,6 +20,7 @@
             android:numColumns="2" 
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="false"
+            android:listSelector="@null"
             android:layout_alignParentTop="true" android:background="#ffffffff" android:padding="0dp">
     </GridView>
 </LinearLayout>

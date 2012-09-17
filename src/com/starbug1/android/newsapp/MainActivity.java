@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -32,7 +33,6 @@ import android.widget.Toast;
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
 import com.starbug1.android.newsapp.utils.AppUtils;
-import com.starbug1.android.newsapp.utils.GIFView;
 
 public class MainActivity extends AbstractActivity {
 	private static final String TAG = "MudanewsActivity";
@@ -121,16 +121,16 @@ public class MainActivity extends AbstractActivity {
 
 		page_ = 0; hasNextPage = true;
 		items_ = new ArrayList<NewsListItem>();
-		adapter_ = new NewsListAdapter(this);
+		adapter_ = new NewsListAdapter(this, dbHelper_);
 
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this, getEntryActivityClass()));
+		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this, dbHelper_, getEntryActivityClass()));
 
-		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(this, R.class));
+		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(this, dbHelper_, R.class));
 		Log.d(TAG, "grid setup");
 
 		grid.setOnScrollListener(new OnScrollListener() {
@@ -210,10 +210,12 @@ public class MainActivity extends AbstractActivity {
 
 	private int column_count_ = 1;
 	private void setupGridColumns() {
+		final DisplayMetrics metrics = new DisplayMetrics();
+		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);  
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
-		int width = d.getWidth();
-		column_count_ = width / 160;
+		int width = (int) (d.getWidth() / metrics.scaledDensity);
+		column_count_ = (int) (width / (160 / 1.5));
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setNumColumns(column_count_);
 	}

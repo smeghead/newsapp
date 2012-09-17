@@ -1,11 +1,15 @@
 package com.starbug1.android.newsapp.utils;
 
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -13,6 +17,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import com.starbug1.android.newsapp.ActivityProcessAditional;
+import com.starbug1.android.newsapp.AlarmReceiver;
 import com.starbug1.android.newsapp.AppException;
 
 public class AppUtils {
@@ -66,6 +71,22 @@ public class AppUtils {
 			aditional.onCreateAditional(activity);
 		} catch (Exception e) {
 			Log.i(TAG, "no class:" + aditionalClassName);
+		}
+	}
+	
+	public static void updateClowlIntervals(Context context, final int clowlIntervals) {
+		final AlarmManager alarmManager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+		final Intent alarmIntent = new Intent(context, AlarmReceiver.class);
+		final PendingIntent sender = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+		if (clowlIntervals != 0) {
+			final GregorianCalendar calendar = new GregorianCalendar();
+			alarmManager.setInexactRepeating(
+					AlarmManager.RTC_WAKEUP,
+					calendar.getTimeInMillis() + 1000 * 60 * 1,
+					1000 * 60 * clowlIntervals,
+					sender); 
+		} else {
+			alarmManager.cancel(sender);
 		}
 	}
 }

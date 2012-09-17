@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="CustomTheme" parent="android:Theme">
-<!--         <item name="android:windowTitleSize">35dip</item> -->
+        <item name="android:windowTitleSize">40px</item>
         <item name="android:windowTitleBackgroundStyle">@style/header_background_color</item>
     </style>
     <style name="CustomTheme">

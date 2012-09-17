@@ -9,6 +9,7 @@ import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
+import android.view.Window;
 import android.widget.TextView;
 
 public class AppPrefActivity extends PreferenceActivity {
@@ -17,6 +18,7 @@ public class AppPrefActivity extends PreferenceActivity {
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
+		requestWindowFeature(Window.FEATURE_NO_TITLE);
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.pref);
 		addPreferencesFromResource(R.xml.pref);
@@ -36,6 +38,8 @@ public class AppPrefActivity extends PreferenceActivity {
 							Object newValue) {
 						preference.setSummary(getStringByValue(
 								clowlIntervalsPref_, newValue.toString()));
+						// 更新間隔の更新
+						AppUtils.updateClowlIntervals(AppPrefActivity.this, Integer.parseInt(newValue.toString()));
 						return true;
 					}
 				});

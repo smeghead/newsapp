@@ -17,6 +17,7 @@ import android.widget.GridView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.FavoriteMonth;
 import com.starbug1.android.newsapp.data.NewsListItem;
 
@@ -27,11 +28,13 @@ import com.starbug1.android.newsapp.data.NewsListItem;
 public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 	private final LayoutInflater inflater_;
 	private final FavoriteListActivity context_;
+	private final DatabaseHelper dbHelper_;
 	private final SimpleDateFormat monthDateFormat = new SimpleDateFormat("yyyy年 M月"); 
 
-	public FavoriteMonthListAdapter(Context context, Class<?> resourceClass) {
+	public FavoriteMonthListAdapter(Context context, DatabaseHelper dbHelper) {
 		super(context, 0, new ArrayList<FavoriteMonth>());
 		context_ = (FavoriteListActivity)context;
+		dbHelper_ = dbHelper;
 		inflater_ = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -57,7 +60,7 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 			final TextView monthLabel = (TextView)view.findViewById(R.id.month);
 			monthLabel.setText(monthDateFormat.format(month.getMonth()));
 			
-			final NewsListAdapter adapter = new NewsListAdapter(context_);
+			final NewsListAdapter adapter = new NewsListAdapter(context_, dbHelper_);
 			for (NewsListItem item : items) {
 				adapter.add(item);
 			}
@@ -67,10 +70,10 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 			final int height = (int) (Math.ceil(Double.valueOf(month.getItems().size()) / context_.getGridColumnCount()) * 160 + 40);
 			view.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, height));
 			
-			grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(context_, EntryActivity.class));
+			grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(context_, dbHelper_, EntryActivity.class));
 
 			grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(
-					context_, R.class));
+					context_, dbHelper_, R.class));
 
 		}
 		return view;

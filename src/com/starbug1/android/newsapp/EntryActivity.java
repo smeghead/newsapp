@@ -6,7 +6,6 @@ import java.util.TimerTask;
 import me.parappa.sdk.PaRappa;
 import android.app.Activity;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,20 +17,18 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.View.OnClickListener;
+import android.view.Window;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
 import com.starbug1.android.newsapp.utils.AppUtils;
-import com.starbug1.android.newsapp.utils.GIFView;
 import com.starbug1.android.newsapp.utils.UrlUtils;
 
 public class EntryActivity extends Activity {
@@ -204,20 +201,7 @@ public class EntryActivity extends Activity {
 		if (currentItem_ == null) return;
 		Log.d(TAG, "favorite id:" + currentItem_.getId());
 		
-		final SQLiteDatabase db = dbHelper_.getWritableDatabase();
-		try {
-			// お気に入り
-			db.execSQL(
-					"insert into favorites (feed_id, created_at) values (?, current_timestamp)",
-					new String[] { String.valueOf(currentItem_.getId()) });
-			currentItem_.setFavorite(true);
-			Toast.makeText(this, currentItem_.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
-		} catch (Exception e) {
-			Log.e(TAG, "failed to favorite.");
-		} finally {
-			if (db != null && db.isOpen())
-				db.close();
-		}
+		dbHelper_.favorite(this, currentItem_, null, true);
 	}
 	
 	protected void share() {

@@ -6,7 +6,6 @@ package com.starbug1.android.newsapp;
 import java.util.ArrayList;
 
 import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
@@ -20,8 +19,8 @@ import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.NewsListItem;
 
 /**
@@ -32,10 +31,12 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 	private final LayoutInflater inflater_;
 	private TextView title_;
 	private final AbstractActivity context_;
+	private final DatabaseHelper dbHelper_;
 
-	public NewsListAdapter(Context context) {
+	public NewsListAdapter(Context context, DatabaseHelper dbHelper) {
 		super(context, 0, new ArrayList<NewsListItem>());
 		context_ = (AbstractActivity)context;
+		dbHelper_ = dbHelper;
 		inflater_ = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 	}
@@ -70,30 +71,8 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 				@Override
 				public void onClick(View v) {
 					final boolean add = !item.isFavorite();
-					//TODO locate right place.
 					//お気に入り
-					final SQLiteDatabase db = context_.getDbHelper().getWritableDatabase();
-					try {
-						
-						db.execSQL(
-								add
-									? "insert into favorites (feed_id, created_at) values (?, current_timestamp)"
-									: "delete from favorites where feed_id = ?",
-								new String[] { String.valueOf(item.getId()) });
-						item.setFavorite(add);
-						final ImageView favorite = (ImageView) v
-								.findViewById(R.id.favorite);
-						favorite.setImageResource(add
-								? android.R.drawable.btn_star_big_on
-								: android.R.drawable.btn_star_big_off);
-						if (add) {
-							Toast.makeText(context_, item.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
-						}
-					} catch (Exception e) {
-						Log.e("MudanewsActivity", "failed to update entry action.");
-					} finally {
-						db.close();
-					}
+					dbHelper_.favorite(context_, item, v, add);
 				}
 			});
 			final WindowManager w = context_.getWindowManager();
