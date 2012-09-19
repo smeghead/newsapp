@@ -3,14 +3,10 @@
  */
 package com.starbug1.android.newsapp;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.widget.ListView;
@@ -18,7 +14,6 @@ import android.widget.TextView;
 
 import com.starbug1.android.newsapp.data.DatabaseHelper;
 import com.starbug1.android.newsapp.data.FavoriteMonth;
-import com.starbug1.android.newsapp.data.NewsListItem;
 
 /**
  * @author smeghead
@@ -30,6 +25,7 @@ public class FavoriteNewsCollectTask extends AsyncTask<String, Integer, List<Fav
 	private final DatabaseHelper dbHelper_;
 	
 	public FavoriteNewsCollectTask(FavoriteListActivity activity, DatabaseHelper dbHelper) {
+		Log.d(TAG, "FavoriteNewsCollectTask");
 		activity_ = activity;
 		dbHelper_ = dbHelper;
 		activity_.gridUpdating = true;

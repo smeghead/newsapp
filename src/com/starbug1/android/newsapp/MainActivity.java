@@ -48,20 +48,23 @@ public class MainActivity extends AbstractActivity {
 	private boolean isBound_;
 	final Handler handler_ = new Handler();
 
-	private ServiceConnection connection_ = new ServiceConnection() {
+	private final ServiceConnection connection_ = new ServiceConnection() {
+		@Override
 		public void onServiceConnected(ComponentName className, IBinder service) {
 			// サービスにはIBinder経由で#getService()してダイレクトにアクセス可能
 			fetchFeedService_ = ((FetchFeedService.FetchFeedServiceLocalBinder) service)
 					.getService();
 		}
 
+		@Override
 		public void onServiceDisconnected(ComponentName className) {
 			fetchFeedService_ = null;
 		}
 	};
 
 	void doBindService() {
-		bindService(new Intent(MainActivity.this, AppUtils.getServiceClass(this)),
+		bindService(
+				new Intent(MainActivity.this, AppUtils.getServiceClass(this)),
 				connection_, Context.BIND_AUTO_CREATE);
 		isBound_ = true;
 	}
@@ -72,8 +75,9 @@ public class MainActivity extends AbstractActivity {
 			isBound_ = false;
 		}
 	}
-	
+
 	ProgressBar loading_ = null;
+
 	private void setLoading(boolean start) {
 		if (loading_ == null) {
 			loading_ = (ProgressBar) findViewById(R.id.loading);
@@ -82,19 +86,22 @@ public class MainActivity extends AbstractActivity {
 				return;
 			}
 		}
-		loading_.setVisibility(start ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+		loading_.setVisibility(start ? ProgressBar.VISIBLE
+				: ProgressBar.INVISIBLE);
 	}
+
 	public void startLoading() {
 		setLoading(true);
 	}
+
 	public void stopLoading() {
 		setLoading(false);
 	}
 
-	protected Class getEntryActivityClass() {
+	protected Class<?> getEntryActivityClass() {
 		return EntryActivity.class;
 	}
-	
+
 	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -104,22 +111,24 @@ public class MainActivity extends AbstractActivity {
 					.detectDiskReads().detectDiskWrites().detectAll()
 					.penaltyLog().build());
 			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-					.detectLeakedSqlLiteObjects()
-					.penaltyLog().penaltyDeath().build());
+					.detectLeakedSqlLiteObjects().penaltyLog().penaltyDeath()
+					.build());
 		}
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		
+
 		setContentView(R.layout.main);
 		Log.d(TAG, "setContentView");
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
-		
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.window_title);
+
 		dbHelper_ = new DatabaseHelper(this);
 
 		doBindService();
 		Log.d(TAG, "bindService");
 
-		page_ = 0; hasNextPage = true;
+		page_ = 0;
+		hasNextPage = true;
 		items_ = new ArrayList<NewsListItem>();
 		adapter_ = new NewsListAdapter(this, dbHelper_);
 
@@ -128,14 +137,17 @@ public class MainActivity extends AbstractActivity {
 		version.setText(versionName);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(this, dbHelper_, getEntryActivityClass()));
+		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(
+				this, dbHelper_, getEntryActivityClass()));
 
-		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(this, dbHelper_, R.class));
+		grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(
+				this, dbHelper_, R.class));
 		Log.d(TAG, "grid setup");
 
 		grid.setOnScrollListener(new OnScrollListener() {
 			private boolean stayBottom = false;
 
+			@Override
 			public void onScrollStateChanged(AbsListView view, int scrollState) {
 				switch (scrollState) {
 				// スクロールしていない
@@ -144,8 +156,9 @@ public class MainActivity extends AbstractActivity {
 					if (stayBottom) {
 						Log.d(TAG, "scrollY: " + grid.getHeight());
 						// load more.
-						
-						if (!MainActivity.this.gridUpdating && MainActivity.this.hasNextPage) {
+
+						if (!MainActivity.this.gridUpdating
+								&& MainActivity.this.hasNextPage) {
 							updateList(++page_);
 						}
 					}
@@ -153,6 +166,7 @@ public class MainActivity extends AbstractActivity {
 				}
 			}
 
+			@Override
 			public void onScroll(AbsListView view, int firstVisibleItem,
 					int visibleItemCount, int totalItemCount) {
 
@@ -164,7 +178,8 @@ public class MainActivity extends AbstractActivity {
 
 		// 初回起動
 		if (dbHelper_.entryIsEmpty()) {
-			final TextView initialMessage = (TextView) this.findViewById(R.id.initialMessage);
+			final TextView initialMessage = (TextView) this
+					.findViewById(R.id.initialMessage);
 			initialMessage.setVisibility(Button.VISIBLE);
 			new Thread(new Runnable() {
 				@Override
@@ -172,9 +187,11 @@ public class MainActivity extends AbstractActivity {
 					for (int i = 0; i < 10; i++) {
 						try {
 							Thread.sleep(500);
-						} catch (Exception e) {}
+						} catch (Exception e) {
+						}
 						Log.d(TAG, "service:" + isBound_);
-						if (isBound_ && fetchFeedService_ != null) break;
+						if (isBound_ && fetchFeedService_ != null)
+							break;
 					}
 					handler_.post(new Runnable() {
 						@Override
@@ -193,25 +210,26 @@ public class MainActivity extends AbstractActivity {
 		final NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 		manager.cancelAll();
 		Log.d(TAG, "notify cancel");
-		
+
 		parappa_ = new PaRappa(this);
 		Log.d(TAG, "parappa");
-		
+
 		initAdditional();
 		AppUtils.onCreateAditional(this);
 		Log.d(TAG, "aditional");
 	}
-	
+
 	protected void initAdditional() {
-		
+
 	}
 
 	private NewsCollectTask task_ = null;
 
 	private int column_count_ = 1;
+
 	private void setupGridColumns() {
 		final DisplayMetrics metrics = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);  
+		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
 		int width = (int) (d.getWidth() / metrics.scaledDensity);
@@ -219,9 +237,11 @@ public class MainActivity extends AbstractActivity {
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setNumColumns(column_count_);
 	}
-	
+
+	@Override
 	public void resetGridInfo() {
-		page_ = 0; hasNextPage = true;
+		page_ = 0;
+		hasNextPage = true;
 		updateList(page_);
 	}
 
@@ -240,7 +260,7 @@ public class MainActivity extends AbstractActivity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		super.onCreateOptionsMenu(menu);
-		
+
 		final MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.mainmenu, menu);
 		return true;
@@ -271,7 +291,10 @@ public class MainActivity extends AbstractActivity {
 	}
 
 	protected void shareAll() {
-		parappa_.shareString(getResources().getString(R.string.shareDescription) + " #" + getResources().getString(R.string.app_name), "紹介");
+		parappa_.shareString(getResources()
+				.getString(R.string.shareDescription)
+				+ " #"
+				+ getResources().getString(R.string.app_name), "紹介");
 	}
 
 	protected void settings() {
@@ -289,18 +312,23 @@ public class MainActivity extends AbstractActivity {
 			public void run() {
 				final int count = fetchFeedService_.updateFeeds(first);
 				handler_.post(new Runnable() {
+					@Override
 					public void run() {
 						final TextView initialMessage = (TextView) findViewById(R.id.initialMessage);
 						initialMessage.setVisibility(TextView.GONE);
 
 						startLoading();
-						page_ = 0; hasNextPage = true;
+						page_ = 0;
+						hasNextPage = true;
 						items_.clear();
 						updateList(page_);
 						if (count == 0) {
-							Toast.makeText(MainActivity.this, "新しい記事はありませんでした", Toast.LENGTH_LONG).show();
+							Toast.makeText(MainActivity.this, "新しい記事はありませんでした",
+									Toast.LENGTH_LONG).show();
 						} else {
-							Toast.makeText(MainActivity.this, count + "件の記事を追加しました", Toast.LENGTH_LONG).show();
+							Toast.makeText(MainActivity.this,
+									count + "件の記事を追加しました", Toast.LENGTH_LONG)
+									.show();
 						}
 					}
 				});
@@ -332,6 +360,7 @@ public class MainActivity extends AbstractActivity {
 		setupGridColumns();
 	}
 
+	@Override
 	public DatabaseHelper getDbHelper() {
 		return dbHelper_;
 	}
