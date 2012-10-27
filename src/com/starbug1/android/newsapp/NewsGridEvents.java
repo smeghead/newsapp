@@ -20,17 +20,19 @@ public class NewsGridEvents {
 		private final AbstractActivity activity_;
 		private final Class<?> entryClass_;
 		private final DatabaseHelper dbHelper_;
-		
-		public NewsItemClickListener(AbstractActivity activity, DatabaseHelper dbHelper, Class<?> entryClass) {
+
+		public NewsItemClickListener(AbstractActivity activity,
+				DatabaseHelper dbHelper, Class<?> entryClass) {
 			activity_ = activity;
 			dbHelper_ = dbHelper;
 			entryClass_ = entryClass;
 		}
-		
+
 		@Override
 		public void onItemClick(AdapterView<?> adapter, View view,
 				int position, long id) {
-			final NewsListItem item = (NewsListItem)adapter.getItemAtPosition(position);
+			final NewsListItem item = (NewsListItem) adapter
+					.getItemAtPosition(position);
 
 			dbHelper_.viewLog(item);
 
@@ -42,16 +44,18 @@ public class NewsGridEvents {
 			final Intent entryIntent = new Intent(activity_, entryClass_);
 			entryIntent.putExtra("item", item);
 			activity_.startActivity(entryIntent);
-			
+
 		}
 	}
-	
-	public static class NewsItemLognClickListener implements AdapterView.OnItemLongClickListener {
+
+	public static class NewsItemLognClickListener implements
+			AdapterView.OnItemLongClickListener {
 		private static final String TAG = "NewsItemLognClickListener";
 		private final AbstractActivity activity_;
 		private final DatabaseHelper dbHelper_;
 
-		public NewsItemLognClickListener(AbstractActivity activity, DatabaseHelper dbHelper, Class<?> resourceClass) {
+		public NewsItemLognClickListener(AbstractActivity activity,
+				DatabaseHelper dbHelper, Class<?> resourceClass) {
 			activity_ = activity;
 			dbHelper_ = dbHelper;
 		}
@@ -60,47 +64,87 @@ public class NewsGridEvents {
 		public boolean onItemLongClick(AdapterView<?> adapter, View viewArg,
 				int position, long arg3) {
 			final View v = viewArg;
-			final NewsListItem item = (NewsListItem)adapter.getItemAtPosition(position);
-//		    Integer item_index = (Integer)v.getTag() - 1;
+			final NewsListItem item = (NewsListItem) adapter
+					.getItemAtPosition(position);
+			// Integer item_index = (Integer)v.getTag() - 1;
 			final AlertDialog.Builder ad = new AlertDialog.Builder(activity_);
-			ad.setTitle("記事のアクション");
-			ad.setItems(R.array.arrays_entry_actions, new DialogInterface.OnClickListener() {
-				public void onClick(DialogInterface dialog, int which) {
-					Log.d("NewsListAdapter", "longclickmenu selected id:" + item.getId());
-					final String processName = activity_.getResources().getStringArray(R.array.arrays_entry_action_values)[which];
-					try {
-						if ("share".equals(processName)) {
-							//共有
-							activity_.parappa_.shareString(item.getTitle() + " " + item.getLink() + " #" + activity_.getResources().getString(R.string.app_name), "共有");
-						} else if ("make_favorite".equals(processName)) {
-							//お気に入り
-							dbHelper_.addFavorite(item);
-							item.setFavorite(true);
-							final ImageView favorite = (ImageView) v
-									.findViewById(R.id.favorite);
-							favorite.setImageResource(android.R.drawable.btn_star_big_on);
-							Toast.makeText(activity_, item.getTitle() + "をお気に入りにしました", Toast.LENGTH_LONG).show();
-						} else if ("make_read".equals(processName)) {
-							//既読にする
-							dbHelper_.viewLog(item);
-							item.setViewCount(item.getViewCount() + 1);
-							final ImageView newIcon = (ImageView) v
-									.findViewById(R.id.newEntry);
-							newIcon.setVisibility(ImageView.GONE);
-							Toast.makeText(activity_, item.getTitle() + "を既読にしました", Toast.LENGTH_LONG).show();
-						} else if ("delete".equals(processName)) {
-							//削除
-							dbHelper_.deleteItem(item);
-							final MainActivity a = (MainActivity)activity_;
-							a.resetGridInfo();
-							Toast.makeText(activity_, item.getTitle() + "を削除しました", Toast.LENGTH_LONG).show();
+			ad.setTitle(activity_.getResources().getString(
+					R.string.actions_of_entry));
+			ad.setItems(R.array.arrays_entry_actions,
+					new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							Log.d("NewsListAdapter",
+									"longclickmenu selected id:" + item.getId());
+							final String processName = activity_.getResources()
+									.getStringArray(
+											R.array.arrays_entry_action_values)[which];
+							try {
+								if ("share".equals(processName)) {
+									// 共有
+									activity_.parappa_.shareString(
+											item.getTitle()
+													+ " "
+													+ item.getLink()
+													+ " #"
+													+ activity_
+															.getResources()
+															.getString(
+																	R.string.app_name),
+											"共有");
+								} else if ("make_favorite".equals(processName)) {
+									// お気に入り
+									dbHelper_.addFavorite(item);
+									item.setFavorite(true);
+									final ImageView favorite = (ImageView) v
+											.findViewById(R.id.favorite);
+									favorite.setImageResource(android.R.drawable.btn_star_big_on);
+									Toast.makeText(
+											activity_,
+											String.format(
+													activity_
+															.getResources()
+															.getString(
+																	R.string.favorited_it),
+													item.getTitle()),
+											Toast.LENGTH_LONG).show();
+								} else if ("make_read".equals(processName)) {
+									// 既読にする
+									dbHelper_.viewLog(item);
+									item.setViewCount(item.getViewCount() + 1);
+									final ImageView newIcon = (ImageView) v
+											.findViewById(R.id.newEntry);
+									newIcon.setVisibility(ImageView.GONE);
+									Toast.makeText(
+											activity_,
+											String.format(
+													activity_
+															.getResources()
+															.getString(
+																	R.string.marked_it_as_read),
+													item.getTitle()),
+											Toast.LENGTH_LONG).show();
+								} else if ("delete".equals(processName)) {
+									// 削除
+									dbHelper_.deleteItem(item);
+									final MainActivity a = (MainActivity) activity_;
+									a.resetGridInfo();
+									Toast.makeText(
+											activity_,
+											String.format(
+													activity_
+															.getResources()
+															.getString(
+																	R.string.removed_it),
+													item.getTitle()),
+											Toast.LENGTH_LONG).show();
+								}
+							} catch (Exception e) {
+								Log.e(TAG, "failed to update entry action.", e);
+							}
 						}
-					} catch (Exception e) {
-						Log.e(TAG, "failed to update entry action.", e);
-					}
-				}
 
-			});
+					});
 			final AlertDialog alert = ad.create();
 			alert.show();
 			return true;

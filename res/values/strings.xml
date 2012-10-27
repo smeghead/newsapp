@@ -6,4 +6,36 @@
     <string name="no_favorites_message">お気に入りにした記事を纏めて見ることができます。\n記事の☆ボタンをタップするか、メニューからお気に入りに追加することができます。</string>
     <string name="header_background_color">#002dfe</string>
     <string name="admob_id">a14edaf2bb22e23</string>
+    <string name="month_date_format">yyyy年 M月</string>
+    <string name="share">共有</string>
+    <string name="news_has_arrived">ニュースが入りました</string>
+    <string name="n_news_added">%d件の新着記事を追加しました</string>
+    <string name="no_newer_news">新しい記事はありませんでした</string>
+    <string name="actions_of_entry">記事のアクション</string>
+    <string name="favorited_it">%sをお気に入りにしました</string>
+    <string name="marked_it_as_read">%sを既読にしました</string>
+    <string name="removed_it">%sを削除しました</string>
+	<string name="favorite">お気に入り</string>
+	<string name="other">その他</string>
+	<string name="share_app_with_friends">アプリを友達に紹介する</string>
+	<string name="review_app">アプリを評価する</string>
+	<string name="support">サポート</string>
+	<string name="all">全て</string>
+	<string name="do_share">共有する</string>
+	<string name="do_reload">再読込み</string>
+	<string name="do_remove">削除する</string>
+	<string name="mark_read">既読にする</string>
+	<string name="update_check">最新記事</string>
+	<string name="settings">設定</string>
+    <string name="image">画像</string>
+    <string name="newentry">NEW</string>
+
+    <string name="auto_crawl">自動更新確認</string>
+    <string name="auto_crawl_interval">自動更新確認間隔</string>
+    <string name="crawl_midnight">夜中に巡回</string>
+    <string name="crawl_midnight_y">する</string>
+    <string name="crawl_midnight_n">しない</string>
+    <string name="notify_sound">新着通知時に音を</string>
+    <string name="notify_sound_y">鳴らす</string>
+    <string name="notify_sound_n">鳴らさない</string>
 </resources>

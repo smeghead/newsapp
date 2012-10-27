@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen
   xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory android:title="巡回">
-        <ListPreference android:title="巡回間隔" android:entries="@array/arrays_pref_intervals" android:entryValues="@array/arrays_pref_interval_values" android:key="clowl_intervals" android:defaultValue="60"></ListPreference>
-        <CheckBoxPreference android:summaryOn="する" android:summaryOff="しない" android:title="夜中に巡回" android:key="pref_night_clowl" /><CheckBoxPreference android:key="pref_notify_sound" android:summaryOn="鳴らす" android:summaryOff="鳴らさない" android:title="新着記事通知時に音を" android:defaultValue="true"></CheckBoxPreference>
+    <PreferenceCategory android:title="@+string/auto_crawl">
+        <ListPreference android:title="@+string/auto_crawl_interval" android:entries="@array/arrays_pref_intervals" android:entryValues="@array/arrays_pref_interval_values" android:key="clowl_intervals" android:defaultValue="60"></ListPreference>
+        <CheckBoxPreference android:summaryOn="@+string/crawl_midnight_y" android:summaryOff="@+string/crawl_midnight_n" android:title="@+string/crawl_midnight" android:key="pref_night_clowl" />
+        <CheckBoxPreference android:key="pref_notify_sound" android:summaryOn="@+string/notify_sound_y" android:summaryOff="@+string/notify_sound_n" android:title="@+string/notify_sound" android:defaultValue="true"></CheckBoxPreference>
         
         
     </PreferenceCategory>

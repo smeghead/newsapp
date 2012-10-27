@@ -26,6 +26,7 @@ public class FavoriteListActivity extends AbstractActivity {
 	public boolean gridUpdating = false;
 
 	ProgressBar loading_ = null;
+
 	private void setLoading(boolean start) {
 		if (loading_ == null) {
 			loading_ = (ProgressBar) findViewById(R.id.loading);
@@ -34,11 +35,14 @@ public class FavoriteListActivity extends AbstractActivity {
 				return;
 			}
 		}
-		loading_.setVisibility(start ? ProgressBar.VISIBLE : ProgressBar.INVISIBLE);
+		loading_.setVisibility(start ? ProgressBar.VISIBLE
+				: ProgressBar.INVISIBLE);
 	}
+
 	public void startLoading() {
 		setLoading(true);
 	}
+
 	public void stopLoading() {
 		setLoading(false);
 	}
@@ -51,34 +55,36 @@ public class FavoriteListActivity extends AbstractActivity {
 					.detectDiskReads().detectDiskWrites().detectAll()
 					.penaltyLog().build());
 			StrictMode.setVmPolicy(new StrictMode.VmPolicy.Builder()
-					.detectLeakedSqlLiteObjects()
-					.penaltyLog().penaltyDeath().build());
+					.detectLeakedSqlLiteObjects().penaltyLog().penaltyDeath()
+					.build());
 		}
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-		
+
 		setContentView(R.layout.favorite_list);
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.window_title);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.window_title);
 
 		dbHelper_ = new DatabaseHelper(this);
 
 		startLoading();
-		
+
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
-		
+
 		setupGridColumns();
-		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this, dbHelper_);
+		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this,
+				dbHelper_);
 		task.execute();
 
 		parappa_ = new PaRappa(this);
-	
+
 		initAdditional();
 		AppUtils.onCreateAditional(this);
 	}
 
 	protected void initAdditional() {
-		
+
 	}
 
 	@Override
@@ -90,7 +96,7 @@ public class FavoriteListActivity extends AbstractActivity {
 	public int getGridColumnCount() {
 		return column_count_;
 	}
-	
+
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -98,14 +104,16 @@ public class FavoriteListActivity extends AbstractActivity {
 	}
 
 	private int column_count_ = 1;
+
 	private void setupGridColumns() {
 		final DisplayMetrics metrics = new DisplayMetrics();
-		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);  
+		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
 		int width = (int) (d.getWidth() / metrics.scaledDensity);
 		column_count_ = (int) (width / (160 / 1.5));
-		final ListView list = (ListView) this.findViewById(R.id.favorite_blocks);
+		final ListView list = (ListView) this
+				.findViewById(R.id.favorite_blocks);
 		for (int i = 0, len = list.getChildCount(); i < len; i++) {
 			final View child = list.getChildAt(i);
 			final GridView grid = (GridView) child.findViewById(R.id.grid);
@@ -117,9 +125,5 @@ public class FavoriteListActivity extends AbstractActivity {
 
 	@Override
 	public void resetGridInfo() {
-		// TODO Auto-generated method stub
-		
 	}
-
-
 }

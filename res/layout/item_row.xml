@@ -6,6 +6,7 @@
 		xmlns:android="http://schemas.android.com/apk/res/android" android:minHeight="106dp">
 	<ImageView
 		android:src="@android:drawable/ic_menu_gallery"
+		android:contentDescription="@+string/image"
 		android:layout_height="wrap_content"
 		android:layout_width="wrap_content"
 		android:id="@+id/item_image"
@@ -25,7 +26,7 @@
 		android:layout_marginBottom="0dp"
 		android:background="#99000000"/>
 	<LinearLayout android:id="@+id/linearLayout1" android:layout_height="match_parent" android:layout_gravity="right|top" android:layout_width="wrap_content" android:layout_margin="3dp" android:weightSum="1">
-		<ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/newentry" android:layout_gravity="right|center_vertical" android:id="@+id/newEntry" android:contentDescription="newentry"></ImageView>
-		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/btn_star_big_off" android:id="@+id/favorite" android:contentDescription="favorite"></ImageView>
+		<ImageView android:layout_height="wrap_content" android:layout_width="wrap_content" android:src="@drawable/newentry" android:layout_gravity="right|center_vertical" android:id="@+id/newEntry" android:contentDescription="@+string/newentry"></ImageView>
+		<ImageView android:layout_width="wrap_content" android:layout_height="wrap_content" android:src="@android:drawable/btn_star_big_off" android:id="@+id/favorite" android:contentDescription="@+string/favorite"></ImageView>
 	</LinearLayout>
 </FrameLayout>

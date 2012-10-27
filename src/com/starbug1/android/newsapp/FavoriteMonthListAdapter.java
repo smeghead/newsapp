@@ -29,14 +29,16 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 	private final LayoutInflater inflater_;
 	private final FavoriteListActivity context_;
 	private final DatabaseHelper dbHelper_;
-	private final SimpleDateFormat monthDateFormat = new SimpleDateFormat("yyyy年 M月"); 
+	private final SimpleDateFormat monthDateFormat_;
 
 	public FavoriteMonthListAdapter(Context context, DatabaseHelper dbHelper) {
 		super(context, 0, new ArrayList<FavoriteMonth>());
-		context_ = (FavoriteListActivity)context;
+		context_ = (FavoriteListActivity) context;
 		dbHelper_ = dbHelper;
 		inflater_ = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+		monthDateFormat_ = new SimpleDateFormat(context.getResources()
+				.getString(R.string.month_date_format));
 	}
 
 	@Override
@@ -54,23 +56,28 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 		final FavoriteMonth month = this.getItem(position);
 		if (month != null) {
 			view.setTag(month);
-			
+
 			final List<NewsListItem> items = month.getItems();
-			
-			final TextView monthLabel = (TextView)view.findViewById(R.id.month);
-			monthLabel.setText(monthDateFormat.format(month.getMonth()));
-			
-			final NewsListAdapter adapter = new NewsListAdapter(context_, dbHelper_);
+
+			final TextView monthLabel = (TextView) view
+					.findViewById(R.id.month);
+			monthLabel.setText(monthDateFormat_.format(month.getMonth()));
+
+			final NewsListAdapter adapter = new NewsListAdapter(context_,
+					dbHelper_);
 			for (NewsListItem item : items) {
 				adapter.add(item);
 			}
 			final GridView grid = (GridView) view.findViewById(R.id.grid);
 			grid.setNumColumns(context_.getGridColumnCount());
 			grid.setAdapter(adapter);
-			final int height = (int) (Math.ceil(Double.valueOf(month.getItems().size()) / context_.getGridColumnCount()) * 160 + 40);
-			view.setLayoutParams(new ListView.LayoutParams(ListView.LayoutParams.MATCH_PARENT, height));
-			
-			grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(context_, dbHelper_, EntryActivity.class));
+			final int height = (int) (Math.ceil(Double.valueOf(month.getItems()
+					.size()) / context_.getGridColumnCount()) * 160 + 40);
+			view.setLayoutParams(new ListView.LayoutParams(
+					ListView.LayoutParams.MATCH_PARENT, height));
+
+			grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(
+					context_, dbHelper_, EntryActivity.class));
 
 			grid.setOnItemLongClickListener(new NewsGridEvents.NewsItemLognClickListener(
 					context_, dbHelper_, R.class));

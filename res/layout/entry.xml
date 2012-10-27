@@ -5,37 +5,31 @@
         android:layout_width="fill_parent"
         android:background="#ffffffff"
         android:layout_height="fill_parent">
-    <LinearLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
-            android:orientation="vertical"
+    <FrameLayout
             android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-        <FrameLayout
-                android:layout_width="fill_parent"
-                android:layout_height="0px"
-                android:layout_weight="1">
-            <WebView 
-                android:layout_width="fill_parent" 
-                android:layout_height="fill_parent"
-                android:id="@+id/entryView">
-            </WebView>
-            <ImageView
-                android:id="@+id/image_share"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:contentDescription="Share"
-                android:layout_gravity="left|bottom"
-                android:padding="10dp"
-                android:visibility="visible"
-                android:src="@android:drawable/ic_menu_share" >
-            </ImageView>
-        </FrameLayout>
-        <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout2" android:layout_gravity="bottom">
-            <com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView2"
-                    ads:adUnitId="@string/admob_id"
-                    ads:adSize="BANNER"
-                    ads:loadAdOnCreate="true">
-            </com.google.ads.AdView>
-        </RelativeLayout>
-    </LinearLayout>
+            android:layout_height="0px"
+            android:layout_weight="1">
+        <WebView 
+            android:layout_width="fill_parent" 
+            android:layout_height="fill_parent"
+            android:id="@+id/entryView">
+        </WebView>
+        <ImageView
+            android:id="@+id/image_share"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@+string/share"
+            android:layout_gravity="left|bottom"
+            android:padding="10dp"
+            android:visibility="visible"
+            android:src="@android:drawable/ic_menu_share" >
+        </ImageView>
+    </FrameLayout>
+    <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:id="@+id/relativeLayout2" android:layout_gravity="bottom">
+        <com.google.ads.AdView android:layout_width="fill_parent" android:layout_height="wrap_content" android:id="@+id/adView2"
+                ads:adUnitId="@string/admob_id"
+                ads:adSize="BANNER"
+                ads:loadAdOnCreate="true">
+        </com.google.ads.AdView>
+    </RelativeLayout>
 </LinearLayout>

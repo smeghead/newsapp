@@ -64,10 +64,17 @@ public abstract class FetchFeedService extends Service {
 	protected static abstract class Feed {
 		public String name = "";
 		public String url = "";
+		public Pattern imageUrlIgnorePattern;
 
 		public Feed(String name, String url) {
 			this.name = name;
 			this.url = url;
+		}
+
+		public Feed(String name, String url, String imageUrlIgnorePattern) {
+			this.name = name;
+			this.url = url;
+			this.imageUrlIgnorePattern = Pattern.compile(imageUrlIgnorePattern);
 		}
 
 		public abstract String getImageUrl(String content, NewsListItem item);
@@ -133,7 +140,8 @@ public abstract class FetchFeedService extends Service {
 					final NotificationManager manager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
 					final Notification notification = new Notification(
 							MetaDataUtil.getApplicationIconId(this),
-							"ニュースが入りました", System.currentTimeMillis());
+							getResources().getString(R.string.news_has_arrived),
+							System.currentTimeMillis());
 					if (sharedPreferences_
 							.getBoolean("pref_notify_sound", true)) {
 						notification.sound = Settings.System.DEFAULT_NOTIFICATION_URI;
@@ -143,9 +151,12 @@ public abstract class FetchFeedService extends Service {
 							getMainActivity());
 					final PendingIntent contentIntent = PendingIntent
 							.getActivity(FetchFeedService.this, 0, intent, 0);
-					notification.setLatestEventInfo(getApplicationContext(),
+					notification.setLatestEventInfo(
+							getApplicationContext(),
 							getResources().getString(R.string.app_name),
-							String.valueOf(count) + "件の新着記事を追加しました",
+							String.format(
+									getResources().getString(
+											R.string.n_news_added), count),
 							contentIntent);
 					manager.notify(R.string.app_name, notification);
 				}
@@ -157,17 +168,17 @@ public abstract class FetchFeedService extends Service {
 
 	private class FeedTask implements Callable<Integer> {
 
-		public final String name;
+		public final Feed feed;
 		public final String url;
 
-		public FeedTask(String name, String url) {
-			this.name = name;
+		public FeedTask(Feed feed, String url) {
+			this.feed = feed;
 			this.url = url;
 		}
 
 		@Override
 		public Integer call() throws Exception {
-			return Integer.valueOf(registerNews(parseXml(this.name, this.url)));
+			return Integer.valueOf(registerNews(parseXml(this.feed, this.url)));
 		}
 
 	}
@@ -199,7 +210,7 @@ public abstract class FetchFeedService extends Service {
 				for (Feed f : this.getFeeds()) {
 					if (queue.remainingCapacity() > 0) {
 						Log.d(TAG, "register feedtask:" + f.name);
-						result.add(exec.submit(new FeedTask(f.name, f.url)));
+						result.add(exec.submit(new FeedTask(f, f.url)));
 					} else {
 						Log.d(TAG, "waiting:" + f.name);
 						Thread.sleep(1000);
@@ -256,7 +267,7 @@ public abstract class FetchFeedService extends Service {
 		return false;
 	}
 
-	private List<NewsListItem> parseXml(String source, String urlString) {
+	private List<NewsListItem> parseXml(Feed feed, String urlString) {
 		final XmlPullParser parser = Xml.newPullParser();
 		final List<NewsListItem> list = new ArrayList<NewsListItem>(20);
 
@@ -277,32 +288,59 @@ public abstract class FetchFeedService extends Service {
 					tag = parser.getName();
 					if (tag.equals("item")) {
 						currentItem = new NewsListItem();
-						currentItem.setSource(source);
+						currentItem.setSource(feed.name);
 					} else if (currentItem != null) {
 						if (tag.equals("title")) {
 							currentItem.setTitle(parser.nextText());
 						} else if (tag.equals("description")) {
 							String text = parser.nextText();
 							currentItem.setDescription(text);
-							String imageUrl = pickupUrl(text);
-							if (imageUrl.length() > 0) {
-								currentItem.setImageUrl(imageUrl);
+							if (currentItem.getImageUrl() == null) {
+								String imageUrl = pickupUrl(text);
+								if (imageUrl.length() > 0) {
+									if (feed.imageUrlIgnorePattern == null
+											|| !feed.imageUrlIgnorePattern
+													.matcher(imageUrl).find()) {
+										currentItem.setImageUrl(imageUrl);
+									}
+								}
 							}
 						} else if (tag.equals("link")) {
 							currentItem.setLink(parser.nextText());
 						} else if (tag.equals("subject")) {
 							currentItem.setCategory(parser.nextText());
 						} else if (tag.equals("encoded")) {
-							String imageUrl = pickupUrl(parser.nextText());
-							currentItem.setImageUrl(imageUrl);
+							if (currentItem.getImageUrl() == null) {
+								String imageUrl = pickupUrl(parser.nextText());
+								if (imageUrl.length() > 0) {
+									if (feed.imageUrlIgnorePattern == null
+											|| !feed.imageUrlIgnorePattern
+													.matcher(imageUrl).find()) {
+										currentItem.setImageUrl(imageUrl);
+									}
+								}
+							}
 						} else if (tag.equals("date")) {
 							String dateExp = parser.nextText();
 							currentItem.setPublishedAt(parseDate(dateExp));
 						} else if (tag.equals("pubDate")) {
 							String dateExp = parser.nextText();
 							currentItem.setPublishedAt(parseDate(dateExp));
+						} else if (tag.equals("thumbnail")) {
+							for (int i = 0; i < parser.getAttributeCount(); i++) {
+								if (parser.getAttributeName(i).equals("url")) {
+									String imageUrl = parser.getAttributeValue(i);
+									if (feed.imageUrlIgnorePattern == null
+											|| !feed.imageUrlIgnorePattern
+													.matcher(imageUrl).find()) {
+										currentItem.setImageUrl(imageUrl);
+										break;
+									}
+								}
+							}
 						}
 					}
+
 					break;
 				case XmlPullParser.END_TAG:
 					tag = parser.getName();

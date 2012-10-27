@@ -12,7 +12,7 @@
 		android:layout_gravity="bottom"
 		android:textColor="#eeffffff"
 		android:textSize="12sp"
-		android:background="#99000000" android:text="2012年 5月"/>
+		android:background="#99000000" android:text="@+string/month_date_format"/>
     <GridView
             android:id="@+id/grid"
             android:stretchMode="columnWidth" 
@@ -21,6 +21,6 @@
             android:layout_height="wrap_content"
             android:drawSelectorOnTop="false"
             android:listSelector="@null"
-            android:layout_alignParentTop="true" android:background="#ffffffff" android:padding="0dp">
+            android:background="#ffffffff" android:padding="0dp">
     </GridView>
 </LinearLayout>

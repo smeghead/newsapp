@@ -294,7 +294,8 @@ public class MainActivity extends AbstractActivity {
 		parappa_.shareString(getResources()
 				.getString(R.string.shareDescription)
 				+ " #"
-				+ getResources().getString(R.string.app_name), "紹介");
+				+ getResources().getString(R.string.app_name), getResources()
+				.getString(R.string.share));
 	}
 
 	protected void settings() {
@@ -323,12 +324,18 @@ public class MainActivity extends AbstractActivity {
 						items_.clear();
 						updateList(page_);
 						if (count == 0) {
-							Toast.makeText(MainActivity.this, "新しい記事はありませんでした",
+							Toast.makeText(
+									MainActivity.this,
+									getResources().getString(
+											R.string.no_newer_news),
 									Toast.LENGTH_LONG).show();
 						} else {
-							Toast.makeText(MainActivity.this,
-									count + "件の記事を追加しました", Toast.LENGTH_LONG)
-									.show();
+							Toast.makeText(
+									MainActivity.this,
+									String.format(
+											getResources().getString(
+													R.string.n_news_added),
+											count), Toast.LENGTH_LONG).show();
 						}
 					}
 				});
