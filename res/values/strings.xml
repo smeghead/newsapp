@@ -38,4 +38,16 @@
     <string name="notify_sound">新着通知時に音を</string>
     <string name="notify_sound_y">鳴らす</string>
     <string name="notify_sound_n">鳴らさない</string>
+    
+    <string name="article_settings">記事設定</string>
+    <string name="thumbnail_size">サムネイルのサイズ</string>
+    
+    <string name="delete_old_articles">古い記事を削除</string>
+    <string name="delete_old_articles_description">お気に入りに入れていない2週間以上古い記事を削除して、ディスク使用量を減らします。この操作は元に戻せません。よろしいですか？</string>
+    <string name="deleted_old_articles">%d件の記事を削除しました</string>
+    <string name="deleted_old_articles_no_feeds">削除対象の記事がありませんでした</string>
+    
+    <string name="delete">削除</string>
+    <string name="cancel">キャンセル</string>
+    
 </resources>

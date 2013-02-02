@@ -1,10 +1,12 @@
 package com.starbug1.android.newsapp;
 
 import me.parappa.sdk.PaRappa;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -24,6 +26,7 @@ public class FavoriteListActivity extends AbstractActivity {
 	final Handler handler_ = new Handler();
 	private DatabaseHelper dbHelper_ = null;
 	public boolean gridUpdating = false;
+	public SharedPreferences sharedPreferences_;
 
 	ProgressBar loading_ = null;
 
@@ -72,6 +75,9 @@ public class FavoriteListActivity extends AbstractActivity {
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
 
+		sharedPreferences_ = PreferenceManager
+				.getDefaultSharedPreferences(this);
+
 		setupGridColumns();
 		FavoriteNewsCollectTask task = new FavoriteNewsCollectTask(this,
 				dbHelper_);
@@ -94,7 +100,7 @@ public class FavoriteListActivity extends AbstractActivity {
 
 	@Override
 	public int getGridColumnCount() {
-		return column_count_;
+		return columnCount_;
 	}
 
 	@Override
@@ -103,22 +109,25 @@ public class FavoriteListActivity extends AbstractActivity {
 		setupGridColumns();
 	}
 
-	private int column_count_ = 1;
+	private int columnCount_ = 1;
 
 	private void setupGridColumns() {
+		final int thumbnailSize = Integer.parseInt(sharedPreferences_
+				.getString("thumbnail_size", "200"));
+
 		final DisplayMetrics metrics = new DisplayMetrics();
 		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
 		int width = (int) (d.getWidth() / metrics.scaledDensity);
-		column_count_ = (int) (width / (160 / 1.5));
+		columnCount_ = (int) (width / (thumbnailSize / 1.5));
 		final ListView list = (ListView) this
 				.findViewById(R.id.favorite_blocks);
 		for (int i = 0, len = list.getChildCount(); i < len; i++) {
 			final View child = list.getChildAt(i);
 			final GridView grid = (GridView) child.findViewById(R.id.grid);
 			if (grid != null) {
-				grid.setNumColumns(column_count_);
+				grid.setNumColumns(columnCount_);
 			}
 		}
 	}

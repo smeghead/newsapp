@@ -377,4 +377,60 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				db.close();
 		}
 	}
+
+	public int deleteOldArticles() {
+		SQLiteDatabase db = null;
+		Cursor c = null;
+		try {
+			db = this.getReadableDatabase();
+
+			Log.d(TAG, "doInBackground deleteOldArticles");
+
+			Calendar thresholdDate = Calendar.getInstance();
+			Log.d(TAG, "now:" + thresholdDate);
+			thresholdDate.add(Calendar.DAY_OF_MONTH, -14);
+			Log.d(TAG, "before 2 weeks:" + thresholdDate);
+			Log.d(TAG, "before 2 weeks time:"
+					+ thresholdDate.getTime().getTime());
+
+			final List<Integer> feedIdsForDelete = new ArrayList<Integer>();
+			c = db.rawQuery(
+					"select distinct f.id "
+							+ "from feeds as f "
+							+ "left join favorites as fav on fav.feed_id = f.id "
+							+ "where fav.id is null and f.created_at < ? order by f.created_at ",
+					new String[] { String.valueOf(thresholdDate.getTime()
+							.getTime()) });
+			c.moveToFirst();
+			if (c.getCount() == 0) {
+				return 0;
+			}
+			for (int i = 0, len = c.getCount(); i < len; i++) {
+				feedIdsForDelete.add(c.getInt(0));
+				c.moveToNext();
+			}
+
+			for (int id : feedIdsForDelete) {
+				Log.d(TAG, "feed id:" + id);
+				db.execSQL("delete from view_logs where feed_id = ?",
+						new String[] { String.valueOf(id) });
+				db.execSQL("delete from images where feed_id = ?",
+						new String[] { String.valueOf(id) });
+				db.execSQL("delete from feeds where id = ?",
+						new String[] { String.valueOf(id) });
+			}
+			db.execSQL("vacuum");
+			Log.d(TAG, "deleteOldArticles");
+
+			return feedIdsForDelete.size();
+		} catch (Exception e) {
+			Log.e(TAG, "deleteOldArticles error", e);
+			return -1;
+		} finally {
+			if (c != null)
+				c.close();
+			if (db != null)
+				db.close();
+		}
+	}
 }

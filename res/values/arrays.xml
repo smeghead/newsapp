@@ -30,4 +30,16 @@
     </string-array>
     <string-array name="arrays_mobile_url_repleace">
     </string-array>
+    
+    <string-array name="arrays_thumbnail_size">
+        <item>大</item>
+        <item>中</item>
+        <item>小</item>
+    </string-array>
+    <string-array name="arrays_thumbnail_size_values">
+        <item>300</item>
+        <item>200</item>
+        <item>150</item>
+    </string-array>
+    
 </resources>

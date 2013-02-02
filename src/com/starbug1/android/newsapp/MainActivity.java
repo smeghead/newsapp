@@ -4,16 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.parappa.sdk.PaRappa;
+import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.StrictMode;
+import android.preference.PreferenceManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
@@ -36,6 +40,7 @@ import com.starbug1.android.newsapp.utils.AppUtils;
 
 public class MainActivity extends AbstractActivity {
 	private static final String TAG = "MudanewsActivity";
+	private static final int PREFERENCE_RESULT = 327990;
 
 	private List<NewsListItem> items_;
 	private int page_ = 0;
@@ -47,6 +52,7 @@ public class MainActivity extends AbstractActivity {
 	private FetchFeedService fetchFeedService_;
 	private boolean isBound_;
 	final Handler handler_ = new Handler();
+	public SharedPreferences sharedPreferences_;
 
 	private final ServiceConnection connection_ = new ServiceConnection() {
 		@Override
@@ -135,6 +141,9 @@ public class MainActivity extends AbstractActivity {
 		final String versionName = AppUtils.getVersionName(this);
 		final TextView version = (TextView) this.findViewById(R.id.version);
 		version.setText(versionName);
+
+		sharedPreferences_ = PreferenceManager
+				.getDefaultSharedPreferences(this);
 
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
 		grid.setOnItemClickListener(new NewsGridEvents.NewsItemClickListener(
@@ -225,17 +234,20 @@ public class MainActivity extends AbstractActivity {
 
 	private NewsCollectTask task_ = null;
 
-	private int column_count_ = 1;
+	private int columnCount_ = 1;
 
 	private void setupGridColumns() {
+		final int thumbnailSize = Integer.parseInt(sharedPreferences_
+				.getString("thumbnail_size", "200"));
+
 		final DisplayMetrics metrics = new DisplayMetrics();
 		this.getWindowManager().getDefaultDisplay().getMetrics(metrics);
 		final WindowManager w = getWindowManager();
 		final Display d = w.getDefaultDisplay();
 		int width = (int) (d.getWidth() / metrics.scaledDensity);
-		column_count_ = (int) (width / (160 / 1.5));
+		columnCount_ = (int) (width / (thumbnailSize / 1.5));
 		final GridView grid = (GridView) this.findViewById(R.id.grid);
-		grid.setNumColumns(column_count_);
+		grid.setNumColumns(columnCount_);
 	}
 
 	@Override
@@ -286,8 +298,35 @@ public class MainActivity extends AbstractActivity {
 		} else if (item.getItemId() == R.id.menu_favorites) {
 			Intent intent = new Intent(this, FavoriteListActivity.class);
 			this.startActivity(intent);
+		} else if (item.getItemId() == R.id.menu_delete_old_articles) {
+			deleteOldArticles();
 		}
 		return super.onOptionsItemSelected(item);
+	}
+
+	protected void deleteOldArticles() {
+		new AlertDialog.Builder(this)
+				.setIcon(android.R.drawable.ic_menu_delete)
+				.setTitle(R.string.delete_old_articles)
+				.setMessage(R.string.delete_old_articles_description)
+				.setPositiveButton(R.string.delete,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								/* ここにYESの処理 */
+								new DeleteOldArticlesTask(MainActivity.this)
+										.execute("");
+							}
+						})
+				.setNegativeButton(R.string.cancel,
+						new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog,
+									int whichButton) {
+								// do nothing
+							}
+						}).show();
 	}
 
 	protected void shareAll() {
@@ -300,7 +339,7 @@ public class MainActivity extends AbstractActivity {
 
 	protected void settings() {
 		final Intent intent = new Intent(this, AppPrefActivity.class);
-		startActivity(intent);
+		startActivityForResult(intent, PREFERENCE_RESULT);
 	}
 
 	protected void fetchFeeds(boolean isFirst) {
@@ -374,6 +413,26 @@ public class MainActivity extends AbstractActivity {
 
 	@Override
 	public int getGridColumnCount() {
-		return this.column_count_;
+		return this.columnCount_;
+	}
+
+	/**
+	 * startActivityForResult の戻りを取得する
+	 */
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		Log.d(TAG, "onActivityResult requestCode:" + requestCode
+				+ " resultCode:" + resultCode);
+		if (requestCode == PREFERENCE_RESULT) {
+			if (resultCode != RESULT_OK) {
+				Log.e(TAG, "something wrong");
+				return;
+			}
+			if (data.getBooleanExtra(AppPrefActivity.NEEDS_REFRESH, false)) {
+				Log.d(TAG,
+						"needs refresh, cos thumbnail size changed in preference activity");
+				updateList(0);
+			}
+		}
 	}
 }

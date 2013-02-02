@@ -329,7 +329,8 @@ public abstract class FetchFeedService extends Service {
 						} else if (tag.equals("thumbnail")) {
 							for (int i = 0; i < parser.getAttributeCount(); i++) {
 								if (parser.getAttributeName(i).equals("url")) {
-									String imageUrl = parser.getAttributeValue(i);
+									String imageUrl = parser
+											.getAttributeValue(i);
 									if (feed.imageUrlIgnorePattern == null
 											|| !feed.imageUrlIgnorePattern
 													.matcher(imageUrl).find()) {
@@ -449,7 +450,7 @@ public abstract class FetchFeedService extends Service {
 			}
 
 			final Matrix matrix = new Matrix();
-			matrix.postScale(160f / width, 160f / height);
+			matrix.postScale(250f / width, 250f / height);
 			final Bitmap scaledBitmap = Bitmap.createBitmap(image, x, y, width,
 					height, matrix, true);
 			final ByteArrayOutputStream stream = new ByteArrayOutputStream();

@@ -9,9 +9,11 @@ import java.util.List;
 
 import android.content.Context;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -26,6 +28,7 @@ import com.starbug1.android.newsapp.data.NewsListItem;
  * 
  */
 public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
+	private final String TAG = "FavoriteMonthListAdapter";
 	private final LayoutInflater inflater_;
 	private final FavoriteListActivity context_;
 	private final DatabaseHelper dbHelper_;
@@ -50,7 +53,7 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 		}
 
 		if (this.getCount() < position + 1) {
-			Log.w("FavoriteMonthListAdapter", "position invalid!");
+			Log.w(TAG, "position invalid!");
 			return null;
 		}
 		final FavoriteMonth month = this.getItem(position);
@@ -71,8 +74,15 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 			final GridView grid = (GridView) view.findViewById(R.id.grid);
 			grid.setNumColumns(context_.getGridColumnCount());
 			grid.setAdapter(adapter);
+
+			final int columnCount = context_.getGridColumnCount();
+
+			final WindowManager w = context_.getWindowManager();
+			final Display d = w.getDefaultDisplay();
+
 			final int height = (int) (Math.ceil(Double.valueOf(month.getItems()
-					.size()) / context_.getGridColumnCount()) * 160 + 40);
+					.size()) / columnCount)
+					* Math.floor(d.getWidth() / columnCount) + 40);
 			view.setLayoutParams(new ListView.LayoutParams(
 					ListView.LayoutParams.MATCH_PARENT, height));
 
@@ -85,5 +95,4 @@ public class FavoriteMonthListAdapter extends ArrayAdapter<FavoriteMonth> {
 		}
 		return view;
 	}
-
 }
