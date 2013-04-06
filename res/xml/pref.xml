@@ -8,8 +8,9 @@
         
         
     </PreferenceCategory>
-    <PreferenceCategory android:title="@string/delete_old_articles">
+    <PreferenceCategory android:title="@string/article_settings">
         <ListPreference android:entries="@array/arrays_thumbnail_size" android:title="@string/thumbnail_size" android:entryValues="@array/arrays_thumbnail_size_values" android:defaultValue="200" android:key="thumbnail_size"/>
+        <Preference android:title="@string/delete_old_articles" android:key="delete_old_articles"/>
     </PreferenceCategory>
     
 </PreferenceScreen>

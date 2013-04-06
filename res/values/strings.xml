@@ -44,6 +44,8 @@
     
     <string name="delete_old_articles">古い記事を削除</string>
     <string name="delete_old_articles_description">お気に入りに入れていない2週間以上古い記事を削除して、ディスク使用量を減らします。この操作は元に戻せません。よろしいですか？</string>
+    <string name="delete_old_articles_deleting">削除中</string>
+    <string name="delete_old_articles_deleting_articles">古い記事を削除しています</string>
     <string name="deleted_old_articles">%d件の記事を削除しました</string>
     <string name="deleted_old_articles_no_feeds">削除対象の記事がありませんでした</string>
     

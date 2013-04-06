@@ -410,15 +410,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				c.moveToNext();
 			}
 
+			StringBuilder cond = new StringBuilder("");
 			for (int id : feedIdsForDelete) {
-				Log.d(TAG, "feed id:" + id);
-				db.execSQL("delete from view_logs where feed_id = ?",
-						new String[] { String.valueOf(id) });
-				db.execSQL("delete from images where feed_id = ?",
-						new String[] { String.valueOf(id) });
-				db.execSQL("delete from feeds where id = ?",
-						new String[] { String.valueOf(id) });
+				Log.d(TAG, "id:" + id);
+				cond.append("?,");
 			}
+			cond.deleteCharAt(cond.length() - 1); // 最後の,を削除する。
+			final String where = "(" + cond.toString() + ")";
+			Log.d(TAG, where);
+
+			db.execSQL("delete from view_logs where feed_id in " + where,
+					feedIdsForDelete.toArray());
+			db.execSQL("delete from images where feed_id in " + where,
+					feedIdsForDelete.toArray());
+			db.execSQL("delete from feeds where id in " + where,
+					feedIdsForDelete.toArray());
 			db.execSQL("vacuum");
 			Log.d(TAG, "deleteOldArticles");
 

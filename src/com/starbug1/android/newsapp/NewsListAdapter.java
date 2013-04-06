@@ -86,20 +86,18 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 			final int size = d.getWidth() / context_.getGridColumnCount();
 			Log.d(TAG, "size:" + size);
 			if (item.getImage() != null) {
-				Bitmap bOrg = item.getImageBitmap();
-				if (bOrg == null) {
+				Bitmap b = item.getImageBitmap();
+				if (b == null) {
 					final byte[] data = item.getImage();
 					try {
-						bOrg = BitmapFactory.decodeByteArray(data, 0,
-								data.length);
+						b = BitmapFactory.decodeByteArray(data, 0, data.length);
 					} catch (OutOfMemoryError e) {
 						Log.e("NewsListAdapter", e.getMessage());
 					}
 				}
 
 				// サイズ調整
-				Bitmap b = bOrg;
-				b = Bitmap.createScaledBitmap(bOrg, size, size, false);
+				b = Bitmap.createScaledBitmap(b, size, size, false);
 
 				final ImageView image = (ImageView) view
 						.findViewById(R.id.item_image);
@@ -109,7 +107,10 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 			} else {
 				final ImageView image = (ImageView) view
 						.findViewById(R.id.item_image);
-				image.setImageResource(R.drawable.no_image);
+				Bitmap b = BitmapFactory.decodeResource(
+						context_.getResources(), R.drawable.no_image);
+				b = Bitmap.createScaledBitmap(b, size, size, false);
+				image.setImageBitmap(b);
 				image.setVisibility(ImageView.VISIBLE);
 			}
 		}

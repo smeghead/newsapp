@@ -12,6 +12,5 @@
         </menu>
     </item>
     <item android:title="@string/settings" android:icon="@android:drawable/ic_menu_preferences" android:id="@+id/menu_settings"></item>
-    <item android:id="@+id/menu_delete_old_articles" android:title="@string/delete_old_articles" android:icon="@android:drawable/ic_menu_delete"></item>
     
 </menu>

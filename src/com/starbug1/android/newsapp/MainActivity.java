@@ -4,11 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import me.parappa.sdk.PaRappa;
-import android.app.AlertDialog;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
@@ -298,35 +296,8 @@ public class MainActivity extends AbstractActivity {
 		} else if (item.getItemId() == R.id.menu_favorites) {
 			Intent intent = new Intent(this, FavoriteListActivity.class);
 			this.startActivity(intent);
-		} else if (item.getItemId() == R.id.menu_delete_old_articles) {
-			deleteOldArticles();
 		}
 		return super.onOptionsItemSelected(item);
-	}
-
-	protected void deleteOldArticles() {
-		new AlertDialog.Builder(this)
-				.setIcon(android.R.drawable.ic_menu_delete)
-				.setTitle(R.string.delete_old_articles)
-				.setMessage(R.string.delete_old_articles_description)
-				.setPositiveButton(R.string.delete,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								/* ここにYESの処理 */
-								new DeleteOldArticlesTask(MainActivity.this)
-										.execute("");
-							}
-						})
-				.setNegativeButton(R.string.cancel,
-						new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog,
-									int whichButton) {
-								// do nothing
-							}
-						}).show();
 	}
 
 	protected void shareAll() {
