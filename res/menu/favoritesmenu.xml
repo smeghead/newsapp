@@ -6,7 +6,6 @@
         <menu>
 		    <item android:id="@+id/menu_review" android:icon="@drawable/ic_menu_dialog" android:title="@string/review_app"></item>
 		    <item android:icon="@drawable/ic_menu_globe" android:id="@+id/menu_notify_all" android:title="@string/share_app_with_friends"></item>
-		    <item android:id="@+id/menu_support" android:title="@string/support" android:icon="@drawable/ic_menu_globe"/>
         </menu>
     </item>
 </menu>

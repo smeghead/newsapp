@@ -408,8 +408,12 @@ public abstract class FetchFeedService extends Service {
 
 	public NewsListItem fetchImage(NewsListItem item) { // //OutOfMemory
 														// 対策として同期化した。
+		Log.d(TAG, "id:" + item.getId() + " title: " + item.getTitle());
+		Log.d(TAG, "link:" + item.getLink());
 		String imageUrl = item.getImageUrl();
+		Log.d(TAG, "imageUrl:" + imageUrl);
 		if (imageUrl == null || imageUrl.length() == 0) {
+			Log.d(TAG, "imageUrl is empty");
 			try {
 				// GIGAZINE はfeedにimageのURLが無いので直に取得しにいく。
 				String content = FileDownloader.download(item.getLink());
@@ -417,6 +421,7 @@ public abstract class FetchFeedService extends Service {
 				final Feed feed = this.getFeed(item.getSource());
 				imageUrl = feed.getImageUrl(content, item);
 				if (imageUrl == null) {
+					Log.d(TAG, "imageUrl dose not exist. gave up");
 					return item;
 				}
 			} catch (AppException e) {
@@ -457,6 +462,7 @@ public abstract class FetchFeedService extends Service {
 			try {
 				scaledBitmap.compress(Bitmap.CompressFormat.JPEG, 50, stream);
 				item.setImage(stream.toByteArray());
+				Log.d(TAG, "setImage");
 			} finally {
 				stream.close();
 			}

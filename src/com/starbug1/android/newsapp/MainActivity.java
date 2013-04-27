@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -51,6 +52,7 @@ public class MainActivity extends AbstractActivity {
 	private boolean isBound_;
 	final Handler handler_ = new Handler();
 	public SharedPreferences sharedPreferences_;
+	public static MainActivity instance;
 
 	private final ServiceConnection connection_ = new ServiceConnection() {
 		@Override
@@ -94,10 +96,12 @@ public class MainActivity extends AbstractActivity {
 				: ProgressBar.INVISIBLE);
 	}
 
+	@Override
 	public void startLoading() {
 		setLoading(true);
 	}
 
+	@Override
 	public void stopLoading() {
 		setLoading(false);
 	}
@@ -110,6 +114,8 @@ public class MainActivity extends AbstractActivity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		Log.d(TAG, "onCreate");
+		instance = this;
+
 		if (AppUtils.DEBUG) {
 			StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
 					.detectDiskReads().detectDiskWrites().detectAll()
@@ -290,9 +296,11 @@ public class MainActivity extends AbstractActivity {
 		} else if (item.getItemId() == R.id.menu_notify_all) {
 			shareAll();
 		} else if (item.getItemId() == R.id.menu_review) {
-			parappa_.gotoMarket();
-		} else if (item.getItemId() == R.id.menu_support) {
-			parappa_.startSupportActivity();
+			String marketUrl = String.format("market://details?id=%s",
+					getPackageName());
+			Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+					Uri.parse(marketUrl));
+			startActivity(Intent.createChooser(intent, "マーケット"));
 		} else if (item.getItemId() == R.id.menu_favorites) {
 			Intent intent = new Intent(this, FavoriteListActivity.class);
 			this.startActivity(intent);
@@ -405,5 +413,10 @@ public class MainActivity extends AbstractActivity {
 				updateList(0);
 			}
 		}
+	}
+
+	@Override
+	public FetchFeedService getService() {
+		return fetchFeedService_;
 	}
 }

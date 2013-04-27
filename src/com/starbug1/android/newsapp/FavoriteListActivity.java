@@ -27,6 +27,7 @@ public class FavoriteListActivity extends AbstractActivity {
 	private DatabaseHelper dbHelper_ = null;
 	public boolean gridUpdating = false;
 	public SharedPreferences sharedPreferences_;
+	private MainActivity mainActivity_;
 
 	ProgressBar loading_ = null;
 
@@ -42,10 +43,12 @@ public class FavoriteListActivity extends AbstractActivity {
 				: ProgressBar.INVISIBLE);
 	}
 
+	@Override
 	public void startLoading() {
 		setLoading(true);
 	}
 
+	@Override
 	public void stopLoading() {
 		setLoading(false);
 	}
@@ -68,6 +71,7 @@ public class FavoriteListActivity extends AbstractActivity {
 				R.layout.window_title);
 
 		dbHelper_ = new DatabaseHelper(this);
+		mainActivity_ = MainActivity.instance; // TODO 呼び出し元Activityの取得
 
 		startLoading();
 
@@ -134,5 +138,10 @@ public class FavoriteListActivity extends AbstractActivity {
 
 	@Override
 	public void resetGridInfo() {
+	}
+
+	@Override
+	public FetchFeedService getService() {
+		return mainActivity_.getService();
 	}
 }

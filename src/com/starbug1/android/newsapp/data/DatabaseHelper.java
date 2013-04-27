@@ -161,17 +161,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 				values.put("published_at", item.getPublishedAt());
 				values.put("created_at", now.getTime());
 				long id = db.insert("feeds", null, values);
+				item.setId((int) id);
 
 				registerCount++;
 
 				if (item.getImage() == null) {
 					continue;
 				}
-				values = new ContentValues();
-				values.put("feed_id", id);
-				values.put("image", item.getImage());
-				values.put("created_at", now.getTime());
-				db.insert("images", null, values);
+				insertImage(item, now);
 			}
 			db.close();
 			return registerCount;
@@ -181,6 +178,19 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			if (db != null && db.isOpen())
 				db.close();
 		}
+	}
+
+	public synchronized void insertImage(NewsListItem item, Date now) {
+		if (item.getImage() == null)
+			return;
+
+		SQLiteDatabase db = this.getWritableDatabase();
+
+		final ContentValues values = new ContentValues();
+		values.put("feed_id", item.getId());
+		values.put("image", item.getImage());
+		values.put("created_at", now.getTime());
+		db.insert("images", null, values);
 	}
 
 	public synchronized List<NewsListItem> getItems(

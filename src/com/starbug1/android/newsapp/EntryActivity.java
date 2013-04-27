@@ -194,11 +194,13 @@ public class EntryActivity extends Activity {
 		} else if (item.getItemId() == R.id.menu_notify_all) {
 			shareAll();
 		} else if (item.getItemId() == R.id.menu_review) {
-			parappa_.gotoMarket();
+			String marketUrl = String.format("market://details?id=%s",
+					getPackageName());
+			Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+					Uri.parse(marketUrl));
+			startActivity(Intent.createChooser(intent, "マーケット"));
 		} else if (item.getItemId() == R.id.menu_favorite) {
 			favorite();
-		} else if (item.getItemId() == R.id.menu_support) {
-			parappa_.startSupportActivity();
 		}
 		return super.onOptionsItemSelected(item);
 	}

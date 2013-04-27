@@ -112,6 +112,13 @@ public class NewsListAdapter extends ArrayAdapter<NewsListItem> {
 				b = Bitmap.createScaledBitmap(b, size, size, false);
 				image.setImageBitmap(b);
 				image.setVisibility(ImageView.VISIBLE);
+				image.setTag(item.getId()); // DelayFetchImageTaskで検索するためにTagを設定する。
+
+				// backgroundで画像取得処理を起動する。
+				Log.d(TAG, "delay fetch image task " + item.getId());
+				DelayFetchImageTask fetchTask = new DelayFetchImageTask(
+						context_, item);
+				fetchTask.execute();
 			}
 		}
 		return view;
